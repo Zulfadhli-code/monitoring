@@ -1,0 +1,1 @@
+<img src="{{ asset('logo-pelindo.jpg') }}" class="w-14 h-14" alt="Logo">
