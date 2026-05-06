@@ -1,18 +1,23 @@
 <x-app-layout>
 
     <x-slot name="header">
-    <h2 class="font-bold text-xl text-black">
-        Monitoring Kesiapan Teknik
+    <h2 class="font-bold text-xl text-black text-center">
+        
+    <!-- SELAMAT DATANG -->
     </h2>
 </x-slot>
 
 
-    
+    <!-- Maps -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
         <!-- CHART -->
-         <div class="w-96 mx-auto mb-6">
+         <div class="w-60 mx-auto mb-6">
     <canvas id="chart"></canvas>
 </div>
     <div class="max-w-7xl mx-auto px-4">
+        <div id="map" class="w-full h-[400px] rounded-lg mb-6"></div>
 
         <!-- SUCCESS MESSAGE -->
         @if(session('success'))
@@ -49,6 +54,7 @@
    Download PDF
 </a>
 
+   <!-- <div id="map" class="w-full  rounded-lg mb-6"></div> -->
         <!-- TABLE -->
         <div class="bg-white shadow rounded-lg overflow-hidden">
             <table class="w-full text-sm">
@@ -280,4 +286,41 @@ function closeModal(){
     modal.classList.add('hidden');
 }
 </script>
+<!-- Maps -->
+ <script>
+   console.log("FASILITAS MAP:", @json($fasilitasMap));
+</script>
+ <script>
+    const map = L.map('map').setView([3.7915, 98.6730], 12); // Belawan
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const data = @json($fasilitasMap);
+
+    data.forEach(item => {
+        if (!item.latitude || !item.longitude) return;
+
+        let color = "green";
+
+        if (item.status === "maintenance") color = "orange";
+        if (item.status === "down") color = "red";
+
+        const marker = L.circleMarker([item.latitude, item.longitude], {
+            radius: 8,
+            color: color,
+            fillColor: color,
+            fillOpacity: 0.8
+        }).addTo(map);
+
+        marker.bindPopup(`
+            <b>${item.detail}</b><br>
+            ${item.lokasi}<br>
+            Status: <b>${item.status}</b>
+        `);
+    });
+</script>
+
+
 </x-app-layout>

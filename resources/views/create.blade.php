@@ -42,16 +42,26 @@
             <input type="file" name="foto"
                 class="w-full bg-white/10 border border-white/20 p-2 rounded text-white">
 
+<!-- Maps -->
+             <input type="text" name="latitude" placeholder="Latitude"
+     class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">
+
+<input type="text" name="longitude" placeholder="Longitude"
+     class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">
+
             <div class="flex gap-2">
                 <a href="{{ url('/dashboard') }}"
                     class="w-1/2 text-center bg-gray-600 hover:bg-gray-700 py-2 rounded">
                     Kembali
                 </a>
 
+                
                 <button class="w-1/2 bg-blue-500 hover:bg-blue-600 py-2 rounded font-bold">
                     Simpan
                 </button>
             </div>
+
+            
 
         </form>
 

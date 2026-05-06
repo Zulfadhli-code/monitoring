@@ -35,6 +35,9 @@ if(request('tanggal')){
     $query->whereDate('updated_at', request('tanggal'));
 }
    
+$fasilitasMap = Fasilitas::whereNotNull('latitude')
+    ->whereNotNull('longitude')
+    ->get();
 $fasilitas = $query->with([
     'histories' => function ($q) {
         $q->latest()->limit(5);
@@ -47,12 +50,13 @@ $fasilitas = $query->with([
     $maintenance = Fasilitas::where('status','maintenance')->count();
     $down = Fasilitas::where('status','down')->count();
 
-    return view('dashboard', compact(
-        'fasilitas',
-        'ready',
-        'maintenance',
-        'down'
-    ));
+       return view('dashboard', [
+        'fasilitas' => $fasilitas,
+        'fasilitasMap' => $fasilitasMap,
+        'ready' => $ready,
+        'maintenance' => $maintenance,
+        'down' => $down
+    ]);
 }
 
     // 2
@@ -69,6 +73,8 @@ public function store(Request $request)
         'kategori' => 'required',
         'status' => 'required',
         'detail' => 'required',
+         'latitude' => 'nullable',
+    'longitude' => 'nullable',
         'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
     ]);
 

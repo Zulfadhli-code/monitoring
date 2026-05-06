@@ -15,7 +15,9 @@ class Fasilitas extends Model
         'kategori',
         'status',
         'detail',
-        'foto'
+        'foto',
+        'latitude',
+    'longitude'
     ];
 
     public function histories()

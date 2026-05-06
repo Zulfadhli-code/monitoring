@@ -32,10 +32,10 @@
             <h2 class="text-2xl font-bold text-center">
                 Monitoring Kesiapan Teknik
             </h2>
-
+<!-- 
             <p class="text-center text-white/70 text-sm mb-6">
                 Login 
-            </p>
+            </p> -->
 
             <!-- FORM -->
             <form method="POST" action="{{ route('login') }}" class="space-y-4">
