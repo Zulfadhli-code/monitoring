@@ -8,11 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class FasilitasHistory extends Model
 {
     protected $fillable = [
-        'fasilitas_id',
-        'user_id',
-        'status_from',
-        'status_to'
-    ];
+
+    'fasilitas_id',
+    'user_id',
+    'status_from',
+    'status_to',
+    'keterangan',
+    'foto'
+
+];
 
     public function user()
     {
@@ -23,4 +27,8 @@ class FasilitasHistory extends Model
     {
         return $this->belongsTo(Fasilitas::class);
     }
+    public function photos()
+{
+    return $this->hasMany(HistoryPhoto::class);
+}
 }

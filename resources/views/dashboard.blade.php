@@ -61,11 +61,13 @@
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="p-3">No</th>
-                        <th class="p-3">Nama</th>
+                        <th class="p-3">Nama Fasilitas</th>
                         <th class="p-3">Lokasi</th>
                         <th class="p-3">Kategori</th>
                         <th class="p-3">Detail</th>
                         <th class="p-3">Status</th>
+                        <th class="p-3">Keterangan</th>
+                        <th class="p-3">Diupdate Oleh</th>
                         <th class="p-3">Update</th>
                         <th class="p-3">Gambar</th>
                         <th class="p-3">Aksi</th>
@@ -86,56 +88,59 @@
                         <td class="p-3">{{  ucwords($item->detail) }}</td>
 
                         <!-- STATUS -->
-                      <td class="p-3 space-y-1">
+                         <td class="p-3">
 
-    <!-- BADGE -->
-    <span class="px-2 py-1 rounded text-white block text-center
-        @if($item->status=='ready') bg-green-500
-        @elseif($item->status=='maintenance') bg-yellow-500
-        @else bg-red-500
-        @endif">
-        {{ strtoupper($item->status) }}
-    </span>
+<span class="px-2 py-1 rounded block text-center text-white
 
-    <!-- UPDATE READY MAINTENANCE DOWN -->
-    @if(auth()->user()->role === 'admin')
-    <select onchange="updateStatus({{ $item->id }}, this.value)"
-        class="border rounded px-2 py-1 w-full text-sm">
-        <option value="ready" {{ $item->status=='ready'?'selected':'' }}>Ready</option>
-        <option value="maintenance" {{ $item->status=='maintenance'?'selected':'' }}>Maintenance</option>
-        <option value="down" {{ $item->status=='down'?'selected':'' }}>Down</option>
-    </select>
+@if($item->status=='ready')
+    bg-green-500
+@elseif($item->status=='maintenance')
+    bg-yellow-500
 @else
-    <div class="text-gray-500 text-sm text-center">
-        (Tidak bisa ubah)
-    </div>
+    bg-red-500
 @endif
+">
 
-</td>
+{{ strtoupper($item->status) }}
 
+</span>
+
+</td><!-- Keterangan -->
+                        <td class="p-3">{{ $item->keterangan ?? '-' }}</td>
+                        <td class="p-3">{{ $item->updater->name ?? '-' }}</td>
+
+                        <!-- Waktu -->
                         <td class="p-3"><div>
    {{ $item->updated_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}
 </div></td>
 
                         <!-- FOTO -->
-                        <td class="p-3">
-                            @if($item->foto)
-                                <a href="{{ asset('storage/'.$item->foto) }}" target="_blank">
-                                    <img src="{{ asset('storage/'.$item->foto) }}" width="60"
-                                        class="rounded hover:scale-110 transition">
-                                </a>
-                            @else
-                                -
-                            @endif
-                        </td>
+                       <td class="p-3">
+
+@if($item->foto)
+
+    <a href="{{ asset('storage/'.$item->foto) }}"
+        target="_blank">
+
+        <img
+            src="{{ asset('storage/'.$item->foto) }}"
+            width="80"
+            class="rounded hover:scale-110 transition">
+
+    </a>
+
+@else
+
+    -
+
+@endif
+
+</td>
 
                         <!-- AKSI -->
                         <td class="p-3">
-                            <button type="button"
-    onclick="showHistory({{ $item->id }})"
-    class="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-    Histori
-</button>
+                            <button onclick="openUpdateModal({{ $item->id }})"class="bg-green-500 text-white px-3 py-1 rounded text-sm">Update</button>
+                            <button type="button"onclick="showHistory({{ $item->id }})"class="bg-blue-500 text-white px-3 py-1 rounded text-sm"> Histori</button>
                             @if(auth()->user()->role === 'admin')
                                 <form action="/fasilitas/{{ $item->id }}" method="POST"
                                     onsubmit="return confirm('Yakin mau hapus?')">
@@ -158,12 +163,20 @@
         <!-- TABLE -->
 
 <!-- 🔥 TARUH MODAL DI SINI -->
+<!-- MODAL HISTORI -->
 <div id="historyModal"
-    class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50">
+    class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-[9999]">
 
     <div class="bg-white rounded-lg shadow-lg w-[500px] max-h-[400px] overflow-auto p-4">
 
         <h3 class="font-bold text-lg mb-3">Riwayat Perubahan</h3>
+        <a id="downloadHistoryPdf"
+    href="#"
+    target="_blank"
+    class="bg-red-500 text-white px-3 py-1 rounded text-sm inline-block mb-3">
+
+    Download PDF
+</a>
 
         <div id="historyContent"></div>
 
@@ -171,6 +184,85 @@
             class="mt-4 bg-gray-500 text-white px-3 py-1 rounded">
             Tutup
         </button>
+
+    </div>
+</div>
+
+
+<!-- MODAL UPDATE -->
+<div id="updateModal"
+    class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50">
+
+    <div class="bg-white rounded-lg shadow-lg w-[500px] p-5">
+
+        <h2 class="text-lg font-bold mb-4">
+            Update Fasilitas
+        </h2>
+
+        <form id="updateForm" enctype="multipart/form-data">
+
+            <input type="hidden" id="fasilitas_id">
+
+            <!-- STATUS -->
+            <div class="mb-3">
+                <label>Status</label>
+
+                <select id="status"
+                    class="w-full border rounded p-2">
+
+                    <option value="ready">Ready</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="down">Down</option>
+
+                </select>
+            </div>
+
+            <!-- KETERANGAN -->
+            <div class="mb-3">
+                <label>Keterangan</label>
+
+                <textarea id="keterangan"
+                    class="w-full border rounded p-2"
+                    rows="3"></textarea>
+            </div>
+
+            <!-- FOTO -->
+            <div class="mb-3">
+                <label>Foto Terbaru</label>
+<div id="foto-container">
+
+    <input
+        type="file"
+        name="foto[]"
+        class="w-full border rounded p-2 mb-2">
+
+</div>
+
+            <div class="flex gap-2 justify-end">
+
+            <button
+    type="button"
+    onclick="tambahFoto()"
+    class="bg-green-500 text-white px-3 py-1 rounded">
+
+    + Tambah Foto
+</button>
+                <button type="button"
+                    onclick="closeUpdateModal()"
+                    class="bg-gray-500 text-white px-4 py-2 rounded">
+
+                    Batal
+                </button>
+
+                <button type="submit"
+                    class="bg-blue-500 text-white px-4 py-2 rounded">
+
+                    Simpan
+                </button>
+
+            </div>
+
+        </form>
 
     </div>
 </div>
@@ -239,6 +331,8 @@ setInterval(loadTable, 5000);
 <!-- Histori -->
  <script>
 async function showHistory(id){
+    document.getElementById('downloadHistoryPdf')
+    .href = `/fasilitas/${id}/history-pdf`;
     const modal = document.getElementById('historyModal');
     const content = document.getElementById('historyContent');
 
@@ -256,26 +350,110 @@ async function showHistory(id){
             return;
         }
 
-        let html = '';
+        let html = `
 
-        data.forEach(item => {
-    const user = item.user ? item.user.name : 'System';
-            html += `
-                <div class="border-b py-2 text-sm">
-                    <div class="font-semibold">${item.user?.name ?? 'System'}</div>
-                    <div>
-                        ${item.status_from ?? '-'} → 
-                        <b>${item.status_to}</b>
-                    </div>
-                    <div class="text-gray-500 text-xs">
-                        ${new Date(item.created_at).toLocaleString()}
-                    </div>
-                </div>
-            `;
-        });
+<table class="w-full text-sm border">
 
-        content.innerHTML = html;
+    <thead class="bg-gray-100">
 
+        <tr>
+
+<th class="border p-2">Sebelum</th>
+
+<th class="border p-2">Diupdate</th>
+            <th class="border p-2">User</th>
+
+            <th class="border p-2">Status</th>
+
+            <th class="border p-2">Keterangan</th>
+
+            <th class="border p-2">Foto</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+`;
+
+data.forEach(item => {
+
+    html += `
+
+        <tr class="border-t">
+
+           <td class="border p-2 text-xs">
+
+    ${
+        item.previous_update
+        ?
+        new Date(item.previous_update).toLocaleString()
+        :
+        '-'
+    }
+
+</td>
+
+<td class="border p-2 text-xs">
+    ${new Date(item.created_at).toLocaleString()}
+</td>
+
+            <td class="border p-2">
+                ${item.user?.name ?? 'System'}
+            </td>
+
+            <td class="border p-2">
+
+                ${item.status_from ?? '-'}
+                →
+                <b>${item.status_to}</b>
+
+            </td>
+
+            <td class="border p-2">
+                ${item.keterangan ?? '-'}
+            </td>
+
+          <td class="border p-2">
+
+    ${
+        item.photos.length
+
+        ?
+
+        item.photos.map(photo => `
+
+            <a href="/storage/${photo.foto}"
+                target="_blank">
+
+                <img
+                    src="/storage/${photo.foto}"
+                    width="60"
+                    class="rounded mb-1">
+
+            </a>
+
+        `).join('')
+
+        :
+
+        '-'
+    }
+
+</td>
+
+        </tr>
+
+    `;
+});
+
+html += `
+    </tbody>
+</table>
+`;
+
+content.innerHTML = html;
     } catch(e){
         content.innerHTML = 'Error load data';
     }
@@ -321,6 +499,89 @@ function closeModal(){
         `);
     });
 </script>
+<!-- Javascript Modal Update -->
+ <script>
 
+function openUpdateModal(id)
+{
+    document.getElementById('updateModal')
+        .classList.remove('hidden');
 
+    document.getElementById('updateModal')
+        .classList.add('flex');
+
+    document.getElementById('fasilitas_id').value = id;
+}
+
+function closeUpdateModal()
+{
+    document.getElementById('updateModal')
+        .classList.add('hidden');
+}
+
+document.getElementById('updateForm')
+.addEventListener('submit', async function(e){
+
+    e.preventDefault();
+
+    const id = document.getElementById('fasilitas_id').value;
+
+    let formData = new FormData();
+
+    formData.append('status',
+        document.getElementById('status').value);
+
+    formData.append('keterangan',
+        document.getElementById('keterangan').value);
+
+   const fotoInputs =
+    document.querySelectorAll(
+        'input[name="foto[]"]'
+    );
+
+fotoInputs.forEach(input => {
+
+    if(input.files[0]){
+
+        formData.append(
+            'foto[]',
+            input.files[0]
+        );
+    }
+
+});
+
+    formData.append('_token',
+        '{{ csrf_token() }}');
+
+    const res = await fetch(`/fasilitas/update/${id}`, {
+        method: 'POST',
+        body: formData
+    });
+    const data = await res.json();
+    if(data.success){
+        location.reload();} else {alert('Gagal update');}});</script>
+
+<!-- Upload FOTO UPDATE -->
+ <script>
+
+function tambahFoto(){
+
+    let container =
+        document.getElementById('foto-container');
+
+    let input =
+        document.createElement('input');
+
+    input.type = 'file';
+
+    input.name = 'foto[]';
+
+    input.className =
+        'w-full border rounded p-2 mb-2';
+
+    container.appendChild(input);
+}
+
+</script>
 </x-app-layout>

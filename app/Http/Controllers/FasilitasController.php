@@ -8,6 +8,8 @@ use App\Models\FasilitasHistory;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf; 
  use Illuminate\Support\Facades\Auth;
+ use App\Models\HistoryPhoto;
+ use App\Models\FasilitasPhoto;
 
 class FasilitasController extends Controller
 {
@@ -39,10 +41,15 @@ $fasilitasMap = Fasilitas::whereNotNull('latitude')
     ->whereNotNull('longitude')
     ->get();
 $fasilitas = $query->with([
+
+    'photos',
+
     'histories' => function ($q) {
         $q->latest()->limit(5);
     },
+
     'histories.user'
+
 ])->latest()->paginate(10);
 
     // 🔥 TAMBAHAN UNTUK CHART
@@ -65,29 +72,114 @@ $fasilitas = $query->with([
     return view('create');
     }
 
-public function store(Request $request)
+    public function store(Request $request)
 {
-    $validated = $request->validate([
+    $request->validate([
+
         'nama' => 'required',
+
         'lokasi' => 'required',
+
         'kategori' => 'required',
+
         'status' => 'required',
+
         'detail' => 'required',
-         'latitude' => 'nullable',
-    'longitude' => 'nullable',
-        'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+
+        'latitude' => 'nullable',
+
+        'longitude' => 'nullable',
+
+        'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+
     ]);
 
-    if ($request->hasFile('foto')) {
-        $path = $request->file('foto')->store('fasilitas', 'public');
-        $validated['foto'] = $path;
+    // =========================
+    // SIMPAN FASILITAS
+    // =========================
+
+    $fasilitas = Fasilitas::create([
+
+        'nama' => $request->nama,
+
+        'lokasi' => $request->lokasi,
+
+        'kategori' => $request->kategori,
+
+        'status' => $request->status,
+
+        'detail' => $request->detail,
+        'keterangan' => $request->keterangan,
+
+        'latitude' => $request->latitude,
+
+        'longitude' => $request->longitude,
+
+    ]);
+
+    // =========================
+    // BUAT HISTORY AWAL
+    // =========================
+
+    $history = FasilitasHistory::create([
+
+        'fasilitas_id' => $fasilitas->id,
+
+        'user_id' => auth()->id(),
+
+        'status_from' => null,
+
+        'status_to' => $request->status,
+
+          'keterangan' => $request->keterangan,
+
+    ]);
+
+    // =========================
+    // UPLOAD FOTO
+    // =========================
+
+    if($request->hasFile('foto')){
+
+        foreach($request->file('foto') as $index => $file){
+
+            $path = $file->store(
+                'fasilitas',
+                'public'
+            );
+
+            // foto utama dashboard
+            if($index == 0){
+
+                $fasilitas->foto = $path;
+
+                $fasilitas->save();
+            }
+
+            // simpan foto fasilitas
+            FasilitasPhoto::create([
+
+                'fasilitas_id' => $fasilitas->id,
+
+                'foto' => $path
+
+            ]);
+
+            // simpan foto histori
+            HistoryPhoto::create([
+
+                'fasilitas_history_id' => $history->id,
+
+                'foto' => $path
+
+            ]);
+        }
     }
 
-    Fasilitas::create($validated);
-
-    return redirect('/')->with('success', 'Data berhasil ditambahkan');
+    return redirect('/')
+        ->with('success',
+            'Data berhasil ditambahkan');
 }
-
     // 3
 
 public function updateStatus(Request $request, $id)
@@ -178,12 +270,132 @@ public function exportPdf()
 
 public function history($id)
 {
-    $histories = \App\Models\FasilitasHistory::with('user')
-        ->where('fasilitas_id', $id)
-        ->latest()
-        ->limit(20)
-        ->get();
+    $histories = FasilitasHistory::with([
+        'user',
+        'photos'
+    ])
+    ->where('fasilitas_id', $id)
+    ->orderBy('created_at', 'desc')
+    ->limit(20)
+    ->get();
+
+    foreach ($histories as $index => $history) {
+
+        $next = $histories[$index + 1] ?? null;
+
+        $history->previous_update =
+            $next ? $next->created_at : null;
+    }
 
     return response()->json($histories);
+}
+
+public function updateData(Request $request, $id)
+{
+    $fasilitas = Fasilitas::findOrFail($id);
+
+    $oldStatus = $fasilitas->status;
+
+    // upload foto baru
+  // upload foto baru
+$latestPhoto = null;
+
+if($request->hasFile('foto')){
+
+    foreach($request->file('foto') as $file){
+
+        $path = $file->store(
+            'history',
+            'public'
+        );
+
+        $latestPhoto = $path;
+    }
+
+    // foto utama fasilitas
+    $fasilitas->foto = $latestPhoto;
+}
+
+    // update data
+    $fasilitas->status = $request->status;
+
+    $fasilitas->keterangan = $request->keterangan;
+
+    $fasilitas->updated_by = auth()->id();
+
+    $fasilitas->save();
+
+    // simpan histori
+    $history = FasilitasHistory::create([
+
+    'fasilitas_id' => $fasilitas->id,
+
+    'user_id' => auth()->id(),
+
+    'status_from' => $oldStatus,
+
+    'status_to' => $request->status,
+
+    'keterangan' => $request->keterangan,
+    
+]);
+// upload foto update
+if($request->hasFile('foto')){
+
+    foreach($request->file('foto') as $index => $file){
+
+        $path = $file->store(
+            'history',
+            'public'
+        );
+
+        // FOTO TERBARU DASHBOARD
+        if($index == 0){
+
+            $fasilitas->foto = $path;
+
+            $fasilitas->save();
+        }
+
+        // FOTO HISTORI
+        HistoryPhoto::create([
+
+            'fasilitas_history_id' => $history->id,
+
+            'foto' => $path
+
+        ]);
+    }
+}
+
+    return response()->json([
+        'success' => true
+    ]);
+}
+public function historyPdf($id)
+{
+    $fasilitas = Fasilitas::findOrFail($id);
+
+    $histories = FasilitasHistory::with('user')
+    ->where('fasilitas_id', $id)
+    ->orderBy('created_at', 'desc')
+    ->get();
+
+foreach ($histories as $index => $history) {
+
+    $next = $histories[$index + 1] ?? null;
+
+    $history->previous_update =
+        $next ? $next->created_at : null;
+}
+
+    $pdf = Pdf::loadView(
+        'pdf.history',
+        compact('fasilitas', 'histories')
+    );
+
+    return $pdf->download(
+        'history-'.$fasilitas->nama.'.pdf'
+    );
 }
 }

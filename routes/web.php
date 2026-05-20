@@ -82,3 +82,10 @@ Route::middleware('auth')->get(
     '/fasilitas/{id}/histories',
     [FasilitasController::class, 'history']
 );
+
+Route::post('/fasilitas/update/{id}',
+    [FasilitasController::class, 'updateData']);
+
+    // PDF histori
+    Route::get('/fasilitas/{id}/history-pdf',
+    [FasilitasController::class, 'historyPdf']);

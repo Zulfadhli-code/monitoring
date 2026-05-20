@@ -11,7 +11,7 @@
         <form method="POST" action="{{ url('/fasilitas/store') }}" enctype="multipart/form-data" class="space-y-4">
             @csrf
 
-            <input type="text" name="nama" placeholder="Nama"
+            <input type="text" name="nama" placeholder="Nama Fasilitas"
                 class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">
 
             <select name="lokasi"
@@ -30,18 +30,24 @@
             </select>
 
             <select name="status"
-                class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">
-                <option>Ready</option>
+                class="w-full bg-white/10 border border-black/20 p-2 rounded text-black placeholder-black/50">
+                <option >Ready</option>
                 <option>Maintenance</option>
                 <option>Down</option>
             </select>
 
+            
             <input type="text" name="detail" placeholder="Detail"
                 class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">
 
-            <input type="file" name="foto"
+           <input
+    type="file"
+    name="foto[]"
+    multiple
+    class="w-full border p-2 rounded" name="foto" multipleclass="w-full border rounded p-2"
                 class="w-full bg-white/10 border border-white/20 p-2 rounded text-white">
-
+     <input type="text" name="keterangan" placeholder="Keterangan"
+                class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">
 <!-- Maps -->
              <input type="text" name="latitude" placeholder="Latitude"
      class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">

@@ -16,6 +16,7 @@ class Fasilitas extends Model
         'status',
         'detail',
         'foto',
+        'keterangan',
         'latitude',
     'longitude'
     ];
@@ -23,5 +24,13 @@ class Fasilitas extends Model
     public function histories()
 {
     return $this->hasMany(FasilitasHistory::class);
+}
+public function updater()
+{
+    return $this->belongsTo(User::class, 'updated_by');
+}
+public function photos()
+{
+    return $this->hasMany(FasilitasPhoto::class);
 }
 }
