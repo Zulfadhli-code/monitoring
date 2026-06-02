@@ -76,19 +76,16 @@ $fasilitas = $query->with([
 {
     $request->validate([
 
-        'nama' => 'required',
-
-        'lokasi' => 'required',
-
-        'kategori' => 'required',
+        'nama' => 'required|string|max:255',
+'lokasi' => 'required|string|max:255',
+'kategori' => 'required|string|max:255',
 
         'status' => 'required',
 
-        'detail' => 'required',
+       'detail' => 'required|string|max:1000',
 
-        'latitude' => 'nullable',
-
-        'longitude' => 'nullable',
+        'latitude' => 'nullable|numeric|between:-90,90',
+'longitude' => 'nullable|numeric|between:-180,180',
 
         'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
 
@@ -233,17 +230,66 @@ public function updateStatus(Request $request, $id)
     // Delete
 public function destroy($id)
 {
-    $data = Fasilitas::findOrFail($id);
+    $data = Fasilitas::with([
+        'photos',
+        'histories.photos'
+    ])->findOrFail($id);
 
-    if ($data->foto) {
+    $deletedFiles = [];
+
+    // Hapus foto utama
+    if (
+        $data->foto &&
+        Storage::disk('public')->exists($data->foto)
+    ) {
         Storage::disk('public')->delete($data->foto);
+
+        $deletedFiles[] = $data->foto;
+    }
+
+    // Hapus foto fasilitas
+    foreach ($data->photos as $photo) {
+
+        if (
+            $photo->foto &&
+            Storage::disk('public')->exists($photo->foto) &&
+            !in_array($photo->foto, $deletedFiles)
+        ) {
+            Storage::disk('public')->delete($photo->foto);
+
+            $deletedFiles[] = $photo->foto;
+        }
+
+        $photo->delete();
+    }
+
+    // Hapus foto histori
+    foreach ($data->histories as $history) {
+
+        foreach ($history->photos as $photo) {
+
+            if (
+                $photo->foto &&
+                Storage::disk('public')->exists($photo->foto) &&
+                !in_array($photo->foto, $deletedFiles)
+            ) {
+                Storage::disk('public')->delete($photo->foto);
+
+                $deletedFiles[] = $photo->foto;
+            }
+
+            $photo->delete();
+        }
+
+        $history->delete();
     }
 
     $data->delete();
 
-    return redirect()->back()->with('success', 'Data berhasil dihapus');
+    return redirect()
+        ->back()
+        ->with('success', 'Data berhasil dihapus');
 }
-
 // PDF EXPORT YEE
 public function exportPdf()
 {
@@ -292,29 +338,31 @@ public function history($id)
 
 public function updateData(Request $request, $id)
 {
+    $request->validate([
+
+    'status' => 'required|in:ready,maintenance,down',
+
+    'keterangan' => 'nullable|string|max:1000',
+
+    'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+
+]);
+
+  // BATASI JUMLAH FOTO
+    if(
+        $request->hasFile('foto') &&
+        count($request->file('foto')) > 5
+    ){
+        return response()->json([
+            'success' => false,
+            'message' => 'Maksimal 5 foto'
+        ], 422);
+    }
+
     $fasilitas = Fasilitas::findOrFail($id);
 
     $oldStatus = $fasilitas->status;
 
-    // upload foto baru
-  // upload foto baru
-$latestPhoto = null;
-
-if($request->hasFile('foto')){
-
-    foreach($request->file('foto') as $file){
-
-        $path = $file->store(
-            'history',
-            'public'
-        );
-
-        $latestPhoto = $path;
-    }
-
-    // foto utama fasilitas
-    $fasilitas->foto = $latestPhoto;
-}
 
     // update data
     $fasilitas->status = $request->status;
