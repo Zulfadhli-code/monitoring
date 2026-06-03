@@ -1,7 +1,7 @@
 <x-guest-layout>
 
 <div class="relative min-h-screen w-full overflow-hidden flex items-center justify-center">
-
+<link rel="icon" type="image/png" href="{{ asset('logo-web.jpeg') }}">
     <!-- BACKGROUND FULL SCREEN -->
     <div class="fixed inset-0">
         <img src="{{ asset('logo-bg.jpg') }}"
@@ -12,10 +12,7 @@
     <!-- OVERLAY GELAP -->
     <div class="fixed inset-0 bg-black/60"></div>
 
-    <!-- EFFECT BUBBLE (optional tetap aman) -->
-    <!-- <div class="absolute w-[500px] h-[500px] bg-blue-500 rounded-full blur-3xl opacity-30 top-[-100px] left-[-100px]"></div> -->
-    <!-- <div class="absolute w-[400px] h-[400px] bg-purple-500 rounded-full blur-3xl opacity-30 bottom-[-100px] right-[-100px]"></div> -->
-
+  
     <!-- LOGIN BOX -->
     <div class="relative w-full max-w-md">
 
@@ -32,10 +29,6 @@
             <h2 class="text-2xl font-bold text-center">
                 Monitoring Kesiapan Teknik
             </h2>
-<!-- 
-            <p class="text-center text-white/70 text-sm mb-6">
-                Login 
-            </p> -->
 
             <!-- FORM -->
             <form method="POST" action="{{ route('login') }}" class="space-y-4">

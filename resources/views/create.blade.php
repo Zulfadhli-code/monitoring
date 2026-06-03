@@ -11,11 +11,11 @@
     onchange="toggleNamaManual()">
 
     <option value="">-- Pilih Nama Fasilitas --</option>
-    <option value="Dermaga 1">Bolder</option>
-    <option value="Dermaga 2">Fender</option>
-    <option value="Crane A">CCTV FIX</option>
-    <option value="Generator">CCTV PTZ</option>
-    <option value="other">+ Lainnya</option>
+    <option >Bolder</option>
+    <option >Fender</option>
+    <option >CCTV FIX</option>
+    <option >CCTV PTZ</option>
+    <option >+ Lainnya</option>
 </select>
 
 <input type="text" name="nama_manual" id="nama_manual"
