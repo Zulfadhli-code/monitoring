@@ -5,16 +5,15 @@
     </h2>
 </x-slot>
 
+<div class="w-60 mx-auto mb-6">
+    <canvas id="chart"></canvas>
+</div>
 
     <!-- Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- CHART -->
-    <div class="w-60 mx-auto mb-6"><canvas id="chart"></canvas></div>
-
-
-<div class="max-w-7xl mx-auto px-4">
+    
+    <div class="max-w-7xl mx-auto px-4">
     <div id="map" class="w-full h-[400px] rounded-lg mb-6"></div>
 
         <!-- SUCCESS MESSAGE -->
@@ -146,7 +145,7 @@
 
 
 <!-- MODAL UPDATE -->
-<div id="updateModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50">
+<div id="updateModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-[9999]">
     <div class="bg-white rounded-lg shadow-lg w-[500px] p-5">
         <h2 class="text-lg font-bold mb-4">
             Update Fasilitas
@@ -202,33 +201,6 @@
 </div>
 
 
-    <!-- CHART JS -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script> fetch('/chart-data') .then(res => res.json()) .then(data => {const ctx = document.getElementById('chart'); new Chart(ctx, {type: 'doughnut', data: { labels: ['Ready', 'Maintenance', 'Down'], datasets: [{   data: [data.ready, data.maintenance, data.down],
-                        backgroundColor: ['green', 'orange', 'red']
-                    }]
-                }
-            });
-        });
-
-        function updateStatus(id, status) {
-            fetch(`/fasilitas/update-status/${id}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                body: JSON.stringify({ status: status })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success){
-                    location.reload();
-                }
-            });
-        }
-    </script>
-
 <script>
 function loadTable() {
 
@@ -254,7 +226,7 @@ function loadTable() {
 // refresh tiap 5 detik
 setInterval(loadTable, 300000);
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 
 <!-- Histori -->
  <script>

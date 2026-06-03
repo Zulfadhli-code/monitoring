@@ -6,37 +6,49 @@
         </h1>
         <form method="POST" action="{{ url('/fasilitas/store') }}" enctype="multipart/form-data" class="space-y-4">
             @csrf
-            <input type="text" name="nama" placeholder="Nama Fasilitas"
-                class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">
+            <select name="nama" id="nama"
+    class="w-full bg-white/10 border border-white/20 p-2 rounded text-white focus:text-black focus:bg-white"
+    onchange="toggleNamaManual()">
+
+    <option value="">-- Pilih Nama Fasilitas --</option>
+    <option value="Dermaga 1">Bolder</option>
+    <option value="Dermaga 2">Fender</option>
+    <option value="Crane A">CCTV FIX</option>
+    <option value="Generator">CCTV PTZ</option>
+    <option value="other">+ Lainnya</option>
+</select>
+
+<input type="text" name="nama_manual" id="nama_manual"
+    placeholder="Isi nama fasilitas"
+    class="w-full bg-white/10 border border-white/20 p-2 rounded text-white hidden mt-2">
             <select name="lokasi"
-                class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">
+                class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50 focus:text-black focus:bg-white">
                 <option>Belawan Lama</option>
                 <option>Ujung Baru</option>
                 <option>IKD</option>
                 <option>Dermaga Citra</option>
             </select>
             <select name="kategori"
-                class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">
+               class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50 focus:text-black focus:bg-white">
                 <option>Dermaga</option>
                 <option>Alat</option>
                 <option>Kantor</option>
             </select>
             <select name="status"
-                class="w-full bg-white/10 border border-black/20 p-2 rounded text-black placeholder-black/50">
+                class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50 focus:text-black focus:bg-white">
                 <option >Ready</option>
                 <option>Maintenance</option>
                 <option>Down</option>
             </select>
             <input type="text" name="detail" placeholder="Detail"
-                class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">
-            <input type="file"name="foto[]" multiple class="w-full border p-2 rounded" name="foto" multipleclass="w-full border rounded p-2"
-                class="w-full bg-white/10 border border-white/20 p-2 rounded text-white">
+                class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50 focus:text-black focus:bg-white">
+           <input type="file" name="foto[]" multiple class="w-full bg-white/10 border border-white/20 p-2 rounded text-white">
             <input type="text" name="keterangan" placeholder="Keterangan"
-                class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">
+                class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50 focus:text-black focus:bg-white">
 
 <!-- Maps -->
-            <input type="text" name="latitude" placeholder="Latitude" class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">
-            <input type="text" name="longitude" placeholder="Longitude" class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50">
+            <input type="text" name="latitude" placeholder="Latitude" class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50 focus:text-black focus:bg-white">
+            <input type="text" name="longitude" placeholder="Longitude" class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50 focus:text-black focus:bg-white">
             <div class="flex gap-2">
                 <a href="{{ url('/dashboard') }}"
                     class="w-1/2 text-center bg-gray-600 hover:bg-gray-700 py-2 rounded">
@@ -48,4 +60,18 @@
             </div>
         </form>
     </div>
+    <script>
+function toggleNamaManual() {
+    let select = document.getElementById('nama');
+    let input = document.getElementById('nama_manual');
+
+    if (select.value === 'other') {
+        input.classList.remove('hidden');
+        input.value = '';
+    } else {
+        input.classList.add('hidden');
+        input.value = select.value;
+    }
+}
+</script>
 </div>
