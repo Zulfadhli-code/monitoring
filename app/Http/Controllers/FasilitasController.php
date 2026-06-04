@@ -87,7 +87,7 @@ $fasilitas = $query->with([
         'latitude' => 'nullable|numeric|between:-90,90',
 'longitude' => 'nullable|numeric|between:-180,180',
 
-        'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+        'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120'
 
     ]);
 
@@ -344,7 +344,7 @@ public function updateData(Request $request, $id)
 
     'keterangan' => 'nullable|string|max:1000',
 
-    'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+    'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120'
 
 ]);
 
