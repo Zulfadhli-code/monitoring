@@ -6,6 +6,7 @@ use App\Http\Controllers\FasilitasController;
 use App\Models\Fasilitas;
  use App\Exports\HistoryExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Controllers\DashboardController;
 
 // redirect root ke dashboard
 Route::get('/', function () {
@@ -13,9 +14,9 @@ Route::get('/', function () {
 });
 
 // dashboard
-Route::get('/dashboard', [FasilitasController::class, 'index'])
-    ->middleware('auth')
-    ->name('dashboard');
+// Route::get('/dashboard', [FasilitasController::class, 'index'])
+//     ->middleware(['auth', 'admin'])
+//     ->name('dashboard');
 
 // group auth
 Route::middleware('auth')->group(function () {
@@ -73,3 +74,8 @@ Route::get('/export-history', function () {
         'history-'.$bulan.'-'.$tahun.'.xlsx'
     );
 });
+
+
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'admin'])
+    ->name('dashboard');

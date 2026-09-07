@@ -16,53 +16,302 @@ class FasilitasController extends Controller
     // 1
     public function index(Request $request)
 {
-   $query = Fasilitas::query();
-
-if(request('search')){
-    $search = request('search');
-
-    $query->where(function($q) use ($search){
-        $q->where('nama','like',"%$search%")
-          ->orWhere('lokasi','like',"%$search%")
-          ->orWhere('kategori','like',"%$search%")
-          ->orWhere('detail','like',"%$search%");
-    });
+    if (Auth::user()->role !== 'admin') {
+    abort(403, 'Unauthorized');
 }
+    /*
+    |--------------------------------------------------------------------------
+    | QUERY DATA FASILITAS
+    |--------------------------------------------------------------------------
+    */
 
-if(request('status')){
-    $query->where('status', request('status'));
-}
+    $query = Fasilitas::query();
 
-if(request('tanggal')){
-    $query->whereDate('updated_at', request('tanggal'));
-}
-   
-$fasilitasMap = Fasilitas::whereNotNull('latitude')
-    ->whereNotNull('longitude')
-    ->get();
-$fasilitas = $query->with([
 
-    'photos',
+    /*
+    |--------------------------------------------------------------------------
+    | SEARCH
+    |--------------------------------------------------------------------------
+    */
 
-    'histories' => function ($q) {
-        $q->latest()->limit(5);
-    },
+    if ($request->filled('search')) {
 
-    'histories.user'
+        $search = $request->search;
 
-])->latest()->paginate(10);
+        $query->where(function ($q) use ($search) {
 
-    // 🔥 TAMBAHAN UNTUK CHART
-    $ready = Fasilitas::where('status','ready')->count();
-    $maintenance = Fasilitas::where('status','maintenance')->count();
-    $down = Fasilitas::where('status','down')->count();
+            $q->where('nama', 'like', "%{$search}%")
+                ->orWhere('lokasi', 'like', "%{$search}%")
+                ->orWhere('kategori', 'like', "%{$search}%")
+                ->orWhere('subkategori', 'like', "%{$search}%")
+                ->orWhere('detail', 'like', "%{$search}%");
 
-       return view('dashboard', [
+        });
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FILTER STATUS
+    |--------------------------------------------------------------------------
+    */
+
+    if ($request->filled('status')) {
+
+        $query->where('status', $request->status);
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FILTER TANGGAL
+    |--------------------------------------------------------------------------
+    */
+
+    if ($request->filled('tanggal')) {
+
+        $query->whereDate(
+            'updated_at',
+            $request->tanggal
+        );
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DATA MAP
+    |--------------------------------------------------------------------------
+    */
+
+    $fasilitasMap = Fasilitas::whereNotNull('latitude')
+        ->whereNotNull('longitude')
+        ->get();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DATA TABLE
+    |--------------------------------------------------------------------------
+    */
+
+    $fasilitas = $query
+        ->with([
+            'photos',
+
+            'histories' => function ($q) {
+                $q->latest()->limit(5);
+            },
+
+            'histories.user'
+
+        ])
+        ->latest()
+        ->paginate(10);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | KATEGORI
+    |--------------------------------------------------------------------------
+    */
+
+    $teknik = Fasilitas::where(
+        'kategori',
+        'Kesiapan Teknik'
+    );
+
+    $operasional = Fasilitas::where(
+        'kategori',
+        'Kesiapan Operasional'
+    );
+
+    $pendukung = Fasilitas::where(
+        'kategori',
+        'Perangkat Pendukung'
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TOTAL
+    |--------------------------------------------------------------------------
+    */
+
+    $teknikTotal = (clone $teknik)->count();
+
+    $operasionalTotal = (clone $operasional)->count();
+
+    $pendukungTotal = (clone $pendukung)->count();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TEKNIK
+    |--------------------------------------------------------------------------
+    */
+
+    $teknikReady = (clone $teknik)
+        ->where('status', 'ready')
+        ->count();
+
+    $teknikMaintenance = (clone $teknik)
+        ->where('status', 'maintenance')
+        ->count();
+
+    $teknikDown = (clone $teknik)
+        ->where('status', 'down')
+        ->count();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | OPERASIONAL
+    |--------------------------------------------------------------------------
+    */
+
+    $operasionalReady = (clone $operasional)
+        ->where('status', 'ready')
+        ->count();
+
+    $operasionalMaintenance = (clone $operasional)
+        ->where('status', 'maintenance')
+        ->count();
+
+    $operasionalDown = (clone $operasional)
+        ->where('status', 'down')
+        ->count();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PERANGKAT PENDUKUNG
+    |--------------------------------------------------------------------------
+    */
+
+    $pendukungReady = (clone $pendukung)
+        ->where('status', 'ready')
+        ->count();
+
+    $pendukungMaintenance = (clone $pendukung)
+        ->where('status', 'maintenance')
+        ->count();
+
+    $pendukungDown = (clone $pendukung)
+        ->where('status', 'down')
+        ->count();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | READINESS PERCENTAGE
+    |--------------------------------------------------------------------------
+    */
+
+    $teknikReadiness = $teknikTotal > 0
+        ? round(($teknikReady / $teknikTotal) * 100)
+        : 0;
+
+
+    $operasionalReadiness = $operasionalTotal > 0
+        ? round(($operasionalReady / $operasionalTotal) * 100)
+        : 0;
+
+
+    $pendukungReadiness = $pendukungTotal > 0
+        ? round(($pendukungReady / $pendukungTotal) * 100)
+        : 0;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TOTAL SEMUA FASILITAS
+    |--------------------------------------------------------------------------
+    */
+
+    $totalFasilitas = Fasilitas::count();
+
+    $ready = Fasilitas::where(
+        'status',
+        'ready'
+    )->count();
+
+    $maintenance = Fasilitas::where(
+        'status',
+        'maintenance'
+    )->count();
+
+    $down = Fasilitas::where(
+        'status',
+        'down'
+    )->count();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ALERT
+    |--------------------------------------------------------------------------
+    */
+
+    $alerts = Fasilitas::whereIn(
+        'status',
+        ['down', 'maintenance']
+    )
+        ->latest('updated_at')
+        ->take(5)
+        ->get();
+
+
+    $alertCount = Fasilitas::whereIn(
+        'status',
+        ['down', 'maintenance']
+    )->count();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RETURN DASHBOARD
+    |--------------------------------------------------------------------------
+    */
+
+    return view('dashboard', [
+
+        // Data utama
         'fasilitas' => $fasilitas,
         'fasilitasMap' => $fasilitasMap,
+
+        // Semua fasilitas
+        'totalFasilitas' => $totalFasilitas,
         'ready' => $ready,
         'maintenance' => $maintenance,
-        'down' => $down
+        'down' => $down,
+
+        // Teknik
+        'teknikTotal' => $teknikTotal,
+        'teknikReady' => $teknikReady,
+        'teknikMaintenance' => $teknikMaintenance,
+        'teknikDown' => $teknikDown,
+        'teknikReadiness' => $teknikReadiness,
+
+        // Operasional
+        'operasionalTotal' => $operasionalTotal,
+        'operasionalReady' => $operasionalReady,
+        'operasionalMaintenance' => $operasionalMaintenance,
+        'operasionalDown' => $operasionalDown,
+        'operasionalReadiness' => $operasionalReadiness,
+
+        // Perangkat Pendukung
+        'pendukungTotal' => $pendukungTotal,
+        'pendukungReady' => $pendukungReady,
+        'pendukungMaintenance' => $pendukungMaintenance,
+        'pendukungDown' => $pendukungDown,
+        'pendukungReadiness' => $pendukungReadiness,
+
+        // Alert
+        'alerts' => $alerts,
+        'alertCount' => $alertCount,
+
     ]);
 }
 
@@ -77,15 +326,16 @@ $fasilitas = $query->with([
     $request->validate([
 
         'nama' => 'required|string|max:255',
-'lokasi' => 'required|string|max:255',
-'kategori' => 'required|string|max:255',
+        'lokasi' => 'required|string|max:255',
+        'kategori' => 'required|string|max:255',
+        'subkategori' => 'required|string|max:255',
 
-        'status' => 'required',
+        'status' => 'required|in:ready,maintenance,down',
 
        'detail' => 'required|string|max:1000',
 
         'latitude' => 'nullable|numeric|between:-90,90',
-'longitude' => 'nullable|numeric|between:-180,180',
+        'longitude' => 'nullable|numeric|between:-180,180',
 
         'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120'
 
@@ -102,7 +352,7 @@ $fasilitas = $query->with([
         'lokasi' => $request->lokasi,
 
         'kategori' => $request->kategori,
-
+        'subkategori' => $request->subkategori,
         'status' => $request->status,
 
         'detail' => $request->detail,
@@ -218,14 +468,14 @@ public function updateStatus(Request $request, $id)
 }
 
     // 4
-    public function dashboard()
-    {
-    return view('dashboard', [
-        'ready' => Fasilitas::where('status','ready')->count(),
-        'maintenance' => Fasilitas::where('status','maintenance')->count(),
-        'down' => Fasilitas::where('status','down')->count(),
-    ]);
-    }
+    // public function dashboard()
+    // {
+    // return view('dashboard', [
+    //     'ready' => Fasilitas::where('status','ready')->count(),
+    //     'maintenance' => Fasilitas::where('status','maintenance')->count(),
+    //     'down' => Fasilitas::where('status','down')->count(),
+    // ]);
+    // }
 
     // Delete
 public function destroy($id)

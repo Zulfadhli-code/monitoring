@@ -1,144 +1,304 @@
-<nav x-data="{ open: false }"
-     class="backdrop-blur-xl bg-white/10 border-b border-white/20 text-white">
+<aside
+    x-data
+    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+    class="fixed left-0 top-0 z-50 h-screen w-64
+           sidebar-gradient border-r border-white/5
+           transition-transform duration-300 ease-in-out"
+>
 
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
+    <div class="flex h-full flex-col">
 
-            <!-- LEFT SIDE -->
-            <div class="flex">
+        <!-- LOGO -->
+        <div class="flex h-20 items-center px-6 border-b border-white/5">
 
-                <!-- Logo -->
-            
+            <a href="{{ route('dashboard') }}"
+               class="flex items-center gap-3">
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="w-10 h-10 rounded-xl bg-white/10
+                            flex items-center justify-center overflow-hidden">
 
-                    <x-nav-link :href="route('dashboard')"
-                        :active="request()->routeIs('dashboard')"
-                        class="text-black hover:text-blue-30">
-                        <!-- {{ __('BRANCH BELAWAN') }} -->
-                    </x-nav-link>
+                    <img
+                        src="{{ asset('logo-web.jpeg') }}"
+                        alt="Logo"
+                        class="w-8 h-8 object-contain"
+                    >
 
                 </div>
-            </div>
 
-            <!-- RIGHT SIDE (USER MENU) -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <div>
+                    <div class="text-sm font-bold text-white">
+                        SPMT
+                    </div>
 
-                <x-dropdown align="right" width="48">
+                    <div class="text-[10px] text-slate-400">
+                        Branch Belawan
+                    </div>
+                </div>
 
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-white/20 text-sm rounded-md text-white bg-white/10 hover:bg-white/20 transition">
+            </a>
 
-                            <div>{{ Auth::user()->name }}</div>
-
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content"
-                        class="bg-slate-900 text-white border border-white/20">
-
-                        <x-dropdown-link :href="route('profile.edit')"
-                            class="text-black hover:bg-white/10">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Logout -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                onclick="event.preventDefault(); this.closest('form').submit();"
-                                class="text-black hover:bg-white/10">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-
-                    </x-slot>
-                </x-dropdown>
-
-            </div>
-
-            <!-- MOBILE BUTTON -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open"
-                    class="p-2 rounded-md text-white hover:bg-white/10">
-
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }"
-                            class="inline-flex"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
-
-                        <path :class="{'hidden': ! open, 'inline-flex': open }"
-                            class="hidden"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-
-                </button>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- MOBILE MENU -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-
-        <div class="pt-2 pb-3 space-y-1 text-white">
-
-            <x-responsive-nav-link :href="route('dashboard')"
-                :active="request()->routeIs('dashboard')"
-                class="text-white">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
+            <!-- MOBILE CLOSE -->
+            <button
+                @click="sidebarOpen = false"
+                class="ml-auto lg:hidden text-slate-400 hover:text-white"
+            >
+                ✕
+            </button>
 
         </div>
 
-        <div class="pt-4 pb-1 border-t border-white/20">
 
-            <div class="px-4">
-                <div class="font-medium text-base text-white">
-                    {{ Auth::user()->name }}
+        <!-- SYSTEM STATUS -->
+        <div class="px-4 pt-5">
+
+            <div class="rounded-xl bg-emerald-500/10
+                        border border-emerald-500/10
+                        px-3 py-2">
+
+                <div class="flex items-center gap-2">
+
+                    <span class="status-dot bg-emerald-400"></span>
+
+                    <span class="text-xs font-medium text-emerald-400">
+                        System Online
+                    </span>
+
                 </div>
-                <div class="font-medium text-sm text-white/70">
-                    {{ Auth::user()->email }}
-                </div>
+
+                <p class="mt-1 text-[10px] text-slate-500">
+                    Monitoring aktif
+                </p>
+
             </div>
 
-            <div class="mt-3 space-y-1">
+        </div>
 
-                <x-responsive-nav-link :href="route('profile.edit')" class="text-white">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
 
+        <!-- MENU -->
+        <div class="flex-1 overflow-y-auto px-4 py-6">
+
+            <p class="px-3 mb-3 text-[10px] font-bold
+                      uppercase tracking-widest text-slate-500">
+                Menu Utama
+            </p>
+
+
+            <!-- DASHBOARD -->
+            <a href="{{ route('dashboard') }}"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl
+               {{ request()->routeIs('dashboard')
+                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/20'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-white' }}
+               transition">
+
+                <svg class="w-5 h-5"
+                     fill="none"
+                     stroke="currentColor"
+                     viewBox="0 0 24 24">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M3 13h8V3H3v10zm10 8h8V11h-8v10zM3 21h8v-4H3v4zm10-14h8V3h-8v4z"/>
+
+                </svg>
+
+                <span class="text-sm font-medium">
+                    Dashboard
+                </span>
+
+            </a>
+
+
+            <!-- KESIAPAN TEKNIK -->
+            <a href="#"
+               class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
+                      text-slate-400 hover:bg-white/5 hover:text-white transition">
+
+                <svg class="w-5 h-5"
+                     fill="none"
+                     stroke="currentColor"
+                     viewBox="0 0 24 24">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M10.5 6h3m-1.5-3v3m-6 4.5h12M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H3a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+
+                </svg>
+
+                <span class="text-sm font-medium">
+                    Kesiapan Teknik
+                </span>
+
+            </a>
+
+
+            <!-- KESIAPAN OPERASIONAL -->
+            <a href="#"
+               class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
+                      text-slate-400 hover:bg-white/5 hover:text-white transition">
+
+                <svg class="w-5 h-5"
+                     fill="none"
+                     stroke="currentColor"
+                     viewBox="0 0 24 24">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 17v-2a4 4 0 014-4h4m0 0V7m0 4l-3-3m3 3l3-3M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+
+                </svg>
+
+                <span class="text-sm font-medium">
+                    Kesiapan Operasional
+                </span>
+
+            </a>
+
+
+            <!-- PERANGKAT PENDUKUNG -->
+            <a href="#"
+               class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
+                      text-slate-400 hover:bg-white/5 hover:text-white transition">
+
+                <svg class="w-5 h-5"
+                     fill="none"
+                     stroke="currentColor"
+                     viewBox="0 0 24 24">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m18 0h-2M5 15H3m18 0h-2M7 5h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2z"/>
+
+                </svg>
+
+                <span class="text-sm font-medium">
+                    Perangkat Pendukung
+                </span>
+
+            </a>
+
+
+            <!-- DIVIDER -->
+            <div class="my-6 border-t border-white/5"></div>
+
+
+            <p class="px-3 mb-3 text-[10px] font-bold
+                      uppercase tracking-widest text-slate-500">
+                Monitoring
+            </p>
+
+
+            <!-- LAPORAN -->
+            <a href="#"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl
+                      text-slate-400 hover:bg-white/5 hover:text-white transition">
+
+                <svg class="w-5 h-5"
+                     fill="none"
+                     stroke="currentColor"
+                     viewBox="0 0 24 24">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h8l4 4v10a2 2 0 01-2 2z"/>
+
+                </svg>
+
+                <span class="text-sm">
+                    Laporan
+                </span>
+
+            </a>
+
+
+            <!-- RIWAYAT -->
+            <a href="#"
+               class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
+                      text-slate-400 hover:bg-white/5 hover:text-white transition">
+
+                <svg class="w-5 h-5"
+                     fill="none"
+                     stroke="currentColor"
+                     viewBox="0 0 24 24">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+
+                </svg>
+
+                <span class="text-sm">
+                    Riwayat
+                </span>
+
+            </a>
+
+        </div>
+
+
+        <!-- USER -->
+        <div class="border-t border-white/5 p-4">
+
+            <div class="flex items-center gap-3">
+
+                <div class="w-10 h-10 rounded-xl
+                            bg-blue-600/20 border border-blue-500/20
+                            flex items-center justify-center
+                            text-blue-400 font-bold">
+
+                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+
+                </div>
+
+                <div class="flex-1 min-w-0">
+
+                    <p class="text-sm font-semibold text-white truncate">
+                        {{ Auth::user()->name }}
+                    </p>
+
+                    <p class="text-xs text-slate-500 capitalize">
+                        {{ Auth::user()->role ?? 'User' }}
+                    </p>
+
+                </div>
+
+                <!-- LOGOUT -->
                 <form method="POST" action="{{ route('logout') }}">
+
                     @csrf
 
-                    <x-responsive-nav-link :href="route('logout')"
-                        onclick="event.preventDefault(); this.closest('form').submit();"
-                        class="text-white">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
+                    <button
+                        type="submit"
+                        title="Logout"
+                        class="text-slate-500 hover:text-red-400 transition"
+                    >
+
+                        <svg class="w-5 h-5"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+
+                            <path stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h6a2 2 0 012 2v1"/>
+
+                        </svg>
+
+                    </button>
 
                 </form>
 
             </div>
+
         </div>
 
     </div>
 
-</nav>
+</aside>

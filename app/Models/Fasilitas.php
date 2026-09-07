@@ -9,17 +9,18 @@ class Fasilitas extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'nama',
-        'lokasi',
-        'kategori',
-        'status',
-        'detail',
-        'foto',
-        'keterangan',
-        'latitude',
-    'longitude'
-    ];
+   protected $fillable = [
+    'nama',
+    'lokasi',
+    'kategori',
+    'subkategori',
+    'status',
+    'detail',
+    'foto',
+    'keterangan',
+    'latitude',
+    'longitude',
+];
 
     public function histories()
 {
