@@ -117,24 +117,34 @@
     </div>
 
 
+
     <!-- SUMMARY -->
-    <div class="xl:col-span-2 glass-card rounded-2xl p-5">
+<div class="xl:col-span-2 glass-card rounded-2xl overflow-hidden">
 
-        <div class="flex items-center justify-between">
+    <!-- HEADER -->
+    <div class="px-5 py-4 border-b border-white/5 flex items-center justify-between">
 
+        <div>
             <h2 class="font-bold text-white">
                 Ringkasan
             </h2>
 
-            <span class="text-[10px] text-slate-500">
-                Semua Area
-            </span>
-
+            <p class="text-[10px] text-slate-500 mt-1">
+                Status seluruh fasilitas
+            </p>
         </div>
 
+        <span class="px-2 py-1 rounded-lg bg-blue-500/10 border border-blue-500/10 text-[10px] text-blue-400">
+            Semua Area
+        </span>
 
-        <!-- Gauge -->
-        <div class="relative flex justify-center mt-5">
+    </div>
+
+
+    <!-- GAUGE -->
+    <div class="px-5 pt-5">
+
+        <div class="relative flex justify-center">
 
             <svg
                 viewBox="0 0 200 120"
@@ -150,7 +160,7 @@
                     stroke-linecap="round"
                 />
 
-                <!-- Green -->
+                <!-- Progress -->
                 <path
                     d="M 20 100 A 80 80 0 0 1 180 100"
                     fill="none"
@@ -164,57 +174,65 @@
             </svg>
 
 
+            <!-- CENTER VALUE -->
             <div class="absolute inset-x-0 bottom-2 text-center">
 
-                <div class="text-4xl font-bold text-white">
+                <div class="text-4xl font-bold tracking-tight text-white">
                     {{ $readiness }}%
                 </div>
 
-                <div class="text-xs text-green-400 font-medium">
-                    SIAP
+                <div class="mt-1 text-[10px] uppercase tracking-wider text-green-400 font-semibold">
+                    {{ $readiness >= 100 ? 'SIAP' : ($readiness >= 70 ? 'WASPADA' : 'PERLU PERHATIAN') }}
                 </div>
 
             </div>
 
         </div>
 
+    </div>
 
-        <!-- Status -->
-        <div class="grid grid-cols-3 gap-2 mt-3">
 
-            <div class="rounded-xl bg-green-500/10 border border-green-500/10 p-3 text-center">
+    <!-- STATUS -->
+    <div class="px-4 mt-1">
+
+        <div class="grid grid-cols-3 gap-2">
+
+            <!-- READY -->
+            <div class="rounded-xl bg-green-500/10 border border-green-500/10 px-2 py-3 text-center">
 
                 <div class="text-xl font-bold text-green-400">
                     {{ $ready }}
                 </div>
 
-                <div class="text-[10px] text-green-400/80">
+                <div class="mt-1 text-[10px] text-green-400/80">
                     Siap
                 </div>
 
             </div>
 
 
-            <div class="rounded-xl bg-yellow-500/10 border border-yellow-500/10 p-3 text-center">
+            <!-- MAINTENANCE -->
+            <div class="rounded-xl bg-yellow-500/10 border border-yellow-500/10 px-2 py-3 text-center">
 
                 <div class="text-xl font-bold text-yellow-400">
                     {{ $maintenance }}
                 </div>
 
-                <div class="text-[10px] text-yellow-400/80">
+                <div class="mt-1 text-[10px] text-yellow-400/80">
                     Perhatian
                 </div>
 
             </div>
 
 
-            <div class="rounded-xl bg-red-500/10 border border-red-500/10 p-3 text-center">
+            <!-- DOWN -->
+            <div class="rounded-xl bg-red-500/10 border border-red-500/10 px-2 py-3 text-center">
 
                 <div class="text-xl font-bold text-red-400">
                     {{ $down }}
                 </div>
 
-                <div class="text-[10px] text-red-400/80">
+                <div class="mt-1 text-[10px] text-red-400/80">
                     Down
                 </div>
 
@@ -222,14 +240,31 @@
 
         </div>
 
+    </div>
 
-        <div class="text-center text-xs text-slate-500 mt-4">
 
-            Total {{ $totalFasilitas }} fasilitas dipantau
+    <!-- TOTAL -->
+    <div class="px-5 py-4 mt-2">
+
+        <div class="rounded-xl bg-slate-900/60 border border-white/5 px-4 py-3 text-center">
+
+            <div class="text-[10px] uppercase tracking-wider text-slate-500">
+                Total Fasilitas Dipantau
+            </div>
+
+            <div class="mt-1 text-lg font-bold text-white">
+                {{ $totalFasilitas }}
+            </div>
+
+            <div class="text-[10px] text-slate-600">
+                fasilitas terdaftar
+            </div>
 
         </div>
 
     </div>
+
+</div>
 
 
     <!-- ALERT -->
