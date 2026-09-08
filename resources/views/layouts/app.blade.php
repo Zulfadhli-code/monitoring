@@ -52,12 +52,24 @@
         }
 
         .glass-card {
-            background: rgba(15, 23, 42, 0.78);
-            border: 1px solid rgba(148, 163, 184, 0.12);
-            box-shadow:
-                0 10px 30px rgba(0, 0, 0, 0.18),
-                inset 0 1px 0 rgba(255,255,255,0.025);
+        background: rgba(15, 23, 42, 0.78);
+        border: 1px solid rgba(148, 163, 184, 0.12);
+        box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255,255,255,0.025);
+
+        transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
         }
+
+.glass-card:hover {
+        border-color: rgba(96, 165, 250, 0.20);
+        box-shadow:
+        0 14px 35px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255,255,255,0.035);
+    }
 
         .sidebar-gradient {
             background:
