@@ -285,14 +285,14 @@
 
         <div class="p-3 space-y-2 max-h-[390px] overflow-y-auto">
 
-            @php
+            <!-- @php
 
                 $alerts = collect($fasilitasMap ?? [])
                     ->whereIn('status', ['down', 'maintenance'])
                     ->sortByDesc('updated_at')
                     ->take(5);
 
-            @endphp
+            @endphp -->
 
 
             @forelse($alerts as $alert)
