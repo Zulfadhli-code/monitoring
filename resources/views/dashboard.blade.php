@@ -1,6 +1,6 @@
 <x-app-layout>
 
-@php
+<!-- @php
 
     $totalStatus = $ready + $maintenance + $down;
 
@@ -8,7 +8,7 @@
         ? round(($ready / $totalStatus) * 100)
         : 0;
 
-@endphp
+@endphp -->
 
 <!-- SUCCESS -->
 @if(session('success'))
