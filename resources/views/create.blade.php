@@ -38,16 +38,29 @@
 </select>
 
             <select name="kategori" id="kategori" class="select2 w-full">
-    <option value="Dermaga">Dermaga</option>
-    <option value="Alat">Alat</option>
-    <option value="Kantor">Kantor</option>
+    <option value="Kesiapan Teknik">Kesiapan Teknik</option>
+    <option value="Kesiapan Operasional">Kesiapan Operasional</option>
+    <option value="Perangkat Pendukung">Perangkat Pendukung</option>
 </select>
-            <select name="status"
-                class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50 focus:text-black focus:bg-white">
-                <option >Ready</option>
-                <option>Maintenance</option>
-                <option>Down</option>
-            </select>
+<select name="subkategori" id="subkategori" class="select2 w-full">
+    <option value=""></option>
+    <option value="CCTV">CCTV</option>
+    <option value="Timbangan">Timbangan</option>
+    <option value="Gate">Gate</option>
+    <option value="Printer">Printer</option>
+    <option value="Intercom">Intercom</option>
+    <option value="Network">Network</option>
+    <option value="Access Control">Access Control</option>
+    <option value="RFID">RFID</option>
+    <option value="Fender">Fender</option>
+    <option value="Bolder">Bolder</option>
+</select>
+           <select name="status"
+    class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50 focus:text-black focus:bg-white">
+    <option value="ready">Ready</option>
+    <option value="maintenance">Maintenance</option>
+    <option value="down">Down</option>
+</select>
             <input type="text" name="detail" placeholder="Detail"
                 class="w-full bg-white/10 border border-white/20 p-2 rounded text-white placeholder-black/50 focus:text-black focus:bg-white">
            <input type="file" name="foto[]" multiple class="w-full bg-white/10 border border-white/20 p-2 rounded text-white">
@@ -73,7 +86,7 @@ $(document).ready(function() {
     $('.select2').select2({
         tags: true,   // bisa ketik manual
         width: '100%',
-        placeholder: "Pilih atau ketik..."
+        placeholder: "Subkategori"
     });
 });
 </script>

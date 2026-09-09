@@ -10,10 +10,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        if (Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
-        }
-
+      
         $teknik = Fasilitas::where('kategori', 'Kesiapan Teknik');
         $operasional = Fasilitas::where('kategori', 'Kesiapan Operasional');
         $pendukung = Fasilitas::where('kategori', 'Perangkat Pendukung');

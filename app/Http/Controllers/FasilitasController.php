@@ -10,6 +10,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
  use Illuminate\Support\Facades\Auth;
  use App\Models\HistoryPhoto;
  use App\Models\FasilitasPhoto;
+ use App\Models\AuditLog;
+ 
 
 class FasilitasController extends Controller
 {
@@ -20,6 +22,98 @@ class FasilitasController extends Controller
     {
     return view('create');
     }
+    public function perangkatPendukung()
+{
+    $query = Fasilitas::where('kategori', 'Perangkat Pendukung');
+
+    $total = (clone $query)->count();
+
+    $ready = (clone $query)
+        ->where('status', 'ready')
+        ->count();
+
+    $maintenance = (clone $query)
+        ->where('status', 'maintenance')
+        ->count();
+
+    $down = (clone $query)
+        ->where('status', 'down')
+        ->count();
+
+    $fasilitas = (clone $query)
+        ->latest()
+        ->paginate(10);
+
+    return view('perangkat-pendukung', compact(
+        'fasilitas',
+        'total',
+        'ready',
+        'maintenance',
+        'down'
+    ));
+}
+
+public function kesiapanTeknik()
+{
+    $query = Fasilitas::where('kategori', 'Kesiapan Teknik');
+
+    $total = (clone $query)->count();
+
+    $ready = (clone $query)
+        ->where('status', 'ready')
+        ->count();
+
+    $maintenance = (clone $query)
+        ->where('status', 'maintenance')
+        ->count();
+
+    $down = (clone $query)
+        ->where('status', 'down')
+        ->count();
+
+    $fasilitas = (clone $query)
+        ->latest()
+        ->paginate(10);
+
+    return view('kesiapan-teknik', compact(
+        'fasilitas',
+        'total',
+        'ready',
+        'maintenance',
+        'down'
+    ));
+}
+
+public function kesiapanOperasional()
+{
+    $query = Fasilitas::where('kategori', 'Kesiapan Operasional');
+
+    $total = (clone $query)->count();
+
+    $ready = (clone $query)
+        ->where('status', 'ready')
+        ->count();
+
+    $maintenance = (clone $query)
+        ->where('status', 'maintenance')
+        ->count();
+
+    $down = (clone $query)
+        ->where('status', 'down')
+        ->count();
+
+    $fasilitas = (clone $query)
+        ->latest()
+        ->paginate(10);
+
+    return view('kesiapan-operasional', compact(
+        'fasilitas',
+        'total',
+        'ready',
+        'maintenance',
+        'down'
+    ));
+}
 
     public function store(Request $request)
 {
@@ -27,16 +121,13 @@ class FasilitasController extends Controller
 
         'nama' => 'required|string|max:255',
         'lokasi' => 'required|string|max:255',
-        'kategori' => 'required|string|max:255',
+        'kategori' => 'required|in:Kesiapan Teknik,Kesiapan Operasional,Perangkat Pendukung',
         'subkategori' => 'required|string|max:255',
 
         'status' => 'required|in:ready,maintenance,down',
-
        'detail' => 'required|string|max:1000',
-
         'latitude' => 'nullable|numeric|between:-90,90',
         'longitude' => 'nullable|numeric|between:-180,180',
-
         'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120'
 
     ]);
@@ -312,6 +403,7 @@ public function updateData(Request $request, $id)
     $fasilitas = Fasilitas::findOrFail($id);
 
     $oldStatus = $fasilitas->status;
+    $oldKeterangan = $fasilitas->keterangan;
 
 
     // update data
@@ -323,20 +415,47 @@ public function updateData(Request $request, $id)
 
     $fasilitas->save();
 
-    // simpan histori
+    // audit perubahan status
+if ($oldStatus !== $request->status) {
+    AuditLog::create([
+        'user_id' => auth()->id(),
+        'fasilitas_id' => $fasilitas->id,
+        'field' => 'status',
+        'old_value' => $oldStatus,
+        'new_value' => $request->status,
+    ]);
+}
+if ($oldKeterangan !== $request->keterangan) {
+    AuditLog::create([
+        'user_id' => auth()->id(),
+        'fasilitas_id' => $fasilitas->id,
+        'field' => 'keterangan',
+        'old_value' => $oldKeterangan,
+        'new_value' => $request->keterangan,
+    ]);
+}
+
+
+    // simpan histori hanya jika status berubah
+// simpan histori hanya jika status berubah
+$history = null;
+
+if ($oldStatus !== $request->status) {
+
     $history = FasilitasHistory::create([
 
-    'fasilitas_id' => $fasilitas->id,
+        'fasilitas_id' => $fasilitas->id,
 
-    'user_id' => auth()->id(),
+        'user_id' => auth()->id(),
 
-    'status_from' => $oldStatus,
+        'status_from' => $oldStatus,
 
-    'status_to' => $request->status,
+        'status_to' => $request->status,
 
-    'keterangan' => $request->keterangan,
-    
-]);
+        'keterangan' => $request->keterangan,
+
+    ]);
+}
 // upload foto update
 if($request->hasFile('foto')){
 
@@ -356,13 +475,24 @@ if($request->hasFile('foto')){
         }
 
         // FOTO HISTORI
-        HistoryPhoto::create([
+        // SIMPAN FOTO
+if ($history) {
 
-            'fasilitas_history_id' => $history->id,
+    // Jika status berubah, foto masuk ke histori
+    HistoryPhoto::create([
+        'fasilitas_history_id' => $history->id,
+        'foto' => $path
+    ]);
 
-            'foto' => $path
+} else {
 
-        ]);
+    // Jika status tidak berubah, foto tetap disimpan
+    // sebagai foto fasilitas
+    FasilitasPhoto::create([
+        'fasilitas_id' => $fasilitas->id,
+        'foto' => $path
+    ]);
+}
     }
 }
 
@@ -370,6 +500,132 @@ if($request->hasFile('foto')){
         'success' => true
     ]);
 }
+
+public function edit($id)
+{
+    $fasilitas = Fasilitas::with('photos')
+        ->findOrFail($id);
+
+    return view('fasilitas-edit', compact('fasilitas'));
+}
+
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'nama' => 'required|string|max:255',
+        'lokasi' => 'required|string|max:255',
+        'kategori' => 'required|string|max:255',
+        'subkategori' => 'required|string|max:255',
+        'status' => 'required|in:ready,maintenance,down',
+        'detail' => 'required|string|max:1000',
+        'keterangan' => 'nullable|string|max:1000',
+        'latitude' => 'nullable|numeric|between:-90,90',
+        'longitude' => 'nullable|numeric|between:-180,180',
+        'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+    ]);
+
+    $fasilitas = Fasilitas::findOrFail($id);
+
+    // Simpan status lama sebelum dilakukan perubahan
+    $oldStatus = $fasilitas->status;
+
+    $fields = [
+        'nama',
+        'lokasi',
+        'kategori',
+        'subkategori',
+        'status',
+        'detail',
+        'keterangan',
+        'latitude',
+        'longitude',
+    ];
+
+    foreach ($fields as $field) {
+
+        $oldValue = $fasilitas->{$field};
+        $newValue = $request->input($field);
+
+        // Hanya catat jika nilai benar-benar berubah
+        if ((string) $oldValue !== (string) $newValue) {
+
+            AuditLog::create([
+                'user_id' => auth()->id(),
+                'fasilitas_id' => $fasilitas->id,
+                'field' => $field,
+                'old_value' => $oldValue,
+                'new_value' => $newValue,
+            ]);
+
+            $fasilitas->{$field} = $newValue;
+        }
+    }
+
+    // Buat histori hanya jika STATUS benar-benar berubah
+    $newStatus = $fasilitas->status;
+
+    if ($oldStatus !== $newStatus) {
+
+        FasilitasHistory::create([
+            'fasilitas_id' => $fasilitas->id,
+            'user_id' => auth()->id(),
+            'status_from' => $oldStatus,
+            'status_to' => $newStatus,
+            'keterangan' => $fasilitas->keterangan,
+        ]);
+    }
+
+
+    // Upload foto fasilitas
+// Upload foto fasilitas
+if ($request->hasFile('foto')) {
+
+    foreach ($request->file('foto') as $index => $file) {
+
+        $path = $file->store(
+            'fasilitas',
+            'public'
+        );
+
+        // Simpan ke galeri foto fasilitas
+        FasilitasPhoto::create([
+            'fasilitas_id' => $fasilitas->id,
+            'foto' => $path
+        ]);
+
+        // Foto pertama menjadi foto utama/dashboard
+        if ($index === 0) {
+            $fasilitas->foto = $path;
+        }
+    }
+}
+    $fasilitas->updated_by = auth()->id();
+    $fasilitas->save();
+
+    return redirect()
+        ->route('fasilitas.show', $fasilitas->id)
+        ->with('success', 'Data fasilitas berhasil diperbarui.');
+}
+public function show($id)
+{
+    $fasilitas = Fasilitas::with([
+        'photos',
+        'histories.user',
+        'histories.photos',
+        'updater',
+    ])->findOrFail($id);
+
+    $auditLogs = AuditLog::with('user')
+        ->where('fasilitas_id', $fasilitas->id)
+        ->latest()
+        ->get();
+
+    return view('fasilitas-detail', compact(
+        'fasilitas',
+        'auditLogs'
+    ));
+}
+
 public function historyPdf($id)
 {
     $fasilitas = Fasilitas::findOrFail($id);
@@ -395,5 +651,47 @@ foreach ($histories as $index => $history) {
     return $pdf->download(
         'history-'.$fasilitas->nama.'.pdf'
     );
+}
+
+public function deletePhoto($id)
+{
+    $photo = FasilitasPhoto::findOrFail($id);
+
+    $fasilitas = Fasilitas::findOrFail($photo->fasilitas_id);
+
+    $deletedPath = $photo->foto;
+
+    // Jika foto yang dihapus adalah foto utama Dashboard
+    if ($fasilitas->foto === $deletedPath) {
+
+        $nextPhoto = $fasilitas->photos()
+            ->where('id', '!=', $photo->id)
+            ->latest()
+            ->first();
+
+        $fasilitas->foto = $nextPhoto?->foto;
+        $fasilitas->save();
+    }
+
+    // Hapus file fisik
+    if ($deletedPath && Storage::disk('public')->exists($deletedPath)) {
+        Storage::disk('public')->delete($deletedPath);
+    }
+
+    // Hapus record foto
+    $photo->delete();
+
+    // Catat penghapusan foto ke Audit Log
+    AuditLog::create([
+        'user_id' => auth()->id(),
+        'fasilitas_id' => $fasilitas->id,
+        'field' => 'foto',
+        'old_value' => $deletedPath,
+        'new_value' => null,
+    ]);
+
+    return redirect()
+        ->route('fasilitas.show', $fasilitas->id)
+        ->with('success', 'Foto berhasil dihapus.');
 }
 }

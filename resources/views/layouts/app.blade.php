@@ -111,10 +111,9 @@
 <body class="antialiased text-slate-200">
 
 <div
-    x-data="{ sidebarOpen: false }"
+    x-data="{ sidebarOpen: false, sidebarCollapsed: false }"
     class="min-h-screen main-gradient"
 >
-
     <!-- Mobile overlay -->
     <div
         x-show="sidebarOpen"
@@ -128,7 +127,10 @@
     @include('layouts.navigation')
 
     <!-- MAIN CONTENT -->
-    <div class="lg:ml-64 min-h-screen">
+<div
+    class="min-h-screen transition-all duration-300 ease-in-out"
+    :class="sidebarCollapsed ? 'lg:ml-0' : 'lg:ml-64'"
+>
 
         <!-- TOP HEADER -->
         <header class="sticky top-0 z-30 h-20 bg-slate-950/85 backdrop-blur-xl border-b border-white/5">
@@ -151,12 +153,12 @@
 
                     <div>
                         <h1 class="text-xl lg:text-2xl font-bold text-white">
-                            Dashboard
-                        </h1>
+    @yield('page-title', 'Dashboard')
+</h1>
 
-                        <p class="text-xs lg:text-sm text-slate-400">
-                            Monitoring Kesiapan Teknik, Operasional & Perangkat Pendukung
-                        </p>
+<p class="text-xs lg:text-sm text-slate-400">
+    @yield('page-description', 'Monitoring Kesiapan Teknik, Operasional & Perangkat Pendukung')
+</p>
                     </div>
                 </div>
 

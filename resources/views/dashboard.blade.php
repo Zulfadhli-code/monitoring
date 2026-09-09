@@ -1,364 +1,221 @@
 <x-app-layout>
-
-<!-- @php
-
-    $totalStatus = $ready + $maintenance + $down;
-
-    $readiness = $totalStatus > 0
-        ? round(($ready / $totalStatus) * 100)
-        : 0;
-
-@endphp -->
-
 <!-- SUCCESS -->
 @if(session('success'))
-
     <div class="mb-5 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-green-400">
         <div class="flex items-center gap-2">
-
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M5 13l4 4L19 7"/>
             </svg>
-
             {{ session('success') }}
-
         </div>
     </div>
-
 @endif
 
-
-<!-- ========================================================= -->
 <!-- DIAGRAM + SUMMARY + ALERT -->
-<!-- ========================================================= -->
 
-<div
-    id="diagram"
-    class="grid grid-cols-1 xl:grid-cols-12 gap-5"
->
-
-
+<div id="diagram" class="grid grid-cols-1 xl:grid-cols-12 gap-5">
     <!-- MAP -->
     <div class="xl:col-span-7 glass-card rounded-2xl overflow-hidden">
-
         <div class="px-5 py-4 flex items-center justify-between border-b border-white/5">
-
             <div>
-
                 <div class="flex items-center gap-2">
-
                     <h2 class="text-white font-bold">
                         Diagram Kesiapan
                     </h2>
-
                     <span class="px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold">
                         LIVE
                     </span>
-
                 </div>
-
-                <p class="text-xs text-slate-500 mt-1">
-                    Monitoring lokasi fasilitas Branch Belawan
-                </p>
-
+                <p class="text-xs text-slate-500 mt-1">Monitoring lokasi fasilitas Branch Belawan </p>
             </div>
-
-            <button
-                onclick="document.getElementById('map').scrollIntoView({behavior:'smooth'})"
-                class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 text-xs border border-blue-500/20"
-            >
+            <button onclick="document.getElementById('map').scrollIntoView({behavior:'smooth'})" class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 text-xs border border-blue-500/20">
                 Lihat Detail
-
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 5l7 7-7 7"/>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
             </button>
-
         </div>
-
 
         <!-- MAP -->
         <div class="p-3">
-
-            <div
-                id="map"
-                class="w-full h-[390px] lg:h-[450px] rounded-xl overflow-hidden"
-            ></div>
-
+            <div id="map" class="w-full h-[390px] lg:h-[450px] rounded-xl overflow-hidden"></div>
         </div>
-
 
         <!-- LEGEND -->
         <div class="px-5 pb-4">
-
             <div class="flex flex-wrap gap-5 text-xs text-slate-400">
-
-                <div class="flex items-center gap-2">
-                    <span class="status-dot bg-green-500"></span>
-                    Ready / Siap
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <span class="status-dot bg-yellow-400"></span>
-                    Maintenance / Perhatian
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <span class="status-dot bg-red-500"></span>
-                    Down / Tidak Siap
-                </div>
-
+                <div class="flex items-center gap-2"><span class="status-dot bg-green-500"></span> Ready / Siap</div>
+                <div class="flex items-center gap-2"><span class="status-dot bg-yellow-400"></span>Maintenance / Perhatian</div>
+                <div class="flex items-center gap-2"><span class="status-dot bg-red-500"></span>Down / Tidak Siap</div>
             </div>
-
         </div>
-
     </div>
 
-
-
     <!-- SUMMARY -->
-<div class="xl:col-span-2 glass-card rounded-2xl overflow-hidden">
+<div class="xl:col-span-2 glass-card rounded-2xl p-5 h-full">
+    {{-- WAKTU SISTEM --}}
+    <div class="text-center">
+        <p class="text-[14px] uppercase tracking-widest text-slate-500">Waktu Indonesia Barat</p>
+        <div id="system-date" class="text-xl font-semibold text-white mt-4">2026-09-08</div>
+        <div id="system-time" class="text-5xl  font-bold text-white  tracking-wide">17:27:00</div>
+        <p class="text-[20px] text-slate-500 mt-2">(UTC+07:00)</p>
+        <p class="text-[20px] text-slate-500">Asia/Jakarta</p>
+    </div>
 
+    {{-- PEMBATAS --}}
+    <div class="border-t border-white/5 my-5"></div>
+
+    {{-- HEADER --}}
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h3 class="text-base font-semibold text-white">Ringkasan</h3>
+            <p class="text-[11px] text-slate-500 mt-1">Status seluruh fasilitas</p>
+        </div>
+        <div class="px-2.5 py-1 rounded-lg bg-blue-500/10border border-blue-500/20 text-[10px] text-blue-400"> Semua Area</div>
+    </div>
+
+    {{-- TOTAL FASILITAS --}}
+    <div class="text-center py-5">
+        <p class="text-[10px] uppercase tracking-widest text-slate-500">Total Fasilitas Dipantau</p>
+        <div class="text-6xl font-bold text-white mt-3"> {{ $totalFasilitas }} </div>
+        <p class="text-[11px] text-slate-500 mt-2"> fasilitas terdaftar </p>
+    </div>
+</div>
+
+{{-- REALTIME CLOCK --}}
+<script> function updateSystemClock() {const now = new Date(); const parts = new Intl.DateTimeFormat('en-CA', {timeZone: 'Asia/Jakarta',year: 'numeric',month: '2-digit',day: '2-digit'}).formatToParts(now);
+    const year = parts.find(p => p.type === 'year').value;
+    const month = parts.find(p => p.type === 'month').value;
+    const day = parts.find(p => p.type === 'day').value;
+    const time = new Intl.DateTimeFormat('en-GB', {timeZone: 'Asia/Jakarta',hour: '2-digit',minute: '2-digit',second: '2-digit',hour12: false}).format(now);
+    document.getElementById('system-date').textContent =`${year}-${month}-${day}`;
+    document.getElementById('system-time').textContent =time;
+}
+
+updateSystemClock();
+setInterval(updateSystemClock, 1000);
+</script>
+    
+    <!-- ALERT -->
+<div class="xl:col-span-3 glass-card rounded-2xl overflow-hidden">
     <!-- HEADER -->
     <div class="px-5 py-4 border-b border-white/5 flex items-center justify-between">
-
         <div>
-            <h2 class="font-bold text-white">
-                Ringkasan
-            </h2>
+            <h2 class="font-bold text-white">Alert Terbaru</h2>
+            <p class="text-[10px] text-slate-500 mt-1"> Fasilitas yang membutuhkan perhatian </p>
+        </div>
+        <span class="px-2 py-1 rounded-lg {{ ($alertCount ?? 0) > 0 ? 'bg-red-500/10 border border-red-500/10 text-red-400' : 'bg-green-500/10 border border-green-500/10 text-green-400'}} text-[10px] font-semibold">{{ $alertCount ?? 0 }} Alert</span>
+    </div>
+
+    <!-- ALERT LIST -->
+    <div class="p-3 space-y-2 max-h-[390px] overflow-y-auto"> @forelse($alerts as $alert) @php $isDown = $alert->status === 'down'; $statusLabel = $isDown? 'DOWN' : 'MAINTENANCE'; @endphp
+            <div class="group rounded-xl p-3 {{ $isDown ? 'bg-red-500/5 border border-red-500/10 hover:border-red-500/20' : 'bg-yellow-500/5 border border-yellow-500/10 hover:border-yellow-500/20' }} transition-colors duration-200">
+                <div class="flex items-start gap-3">
+                    <!-- ICON -->
+                    <div class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center
+                        {{ $isDown
+                            ? 'bg-red-500/10 text-red-400'
+                            : 'bg-yellow-500/10 text-yellow-400'
+                        }}">
+
+                        @if($isDown)
+
+                            <!-- DOWN ICON -->
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 9v4m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"
+                                />
+                            </svg>
+
+                        @else
+
+                            <!-- MAINTENANCE ICON -->
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M11 4a7 7 0 0 0 0 14h1a7 7 0 0 0 0-14h-1zm1 3v4l3 2"
+                                />
+                            </svg>
+
+                        @endif
+
+                    </div>
+
+
+                    <!-- CONTENT -->
+                    <div class="min-w-0 flex-1">
+
+    <div class="flex items-start justify-between gap-2">
+
+        <div class="min-w-0">
+            <p class="text-sm font-semibold text-white truncate">
+                {{ ucwords($alert->nama ?? $alert->detail ?? 'Fasilitas') }}
+            </p>
 
             <p class="text-[10px] text-slate-500 mt-1">
-                Status seluruh fasilitas
+                📍 {{ $alert->lokasi ?? 'Lokasi tidak tersedia' }}
             </p>
         </div>
 
-        <span class="px-2 py-1 rounded-lg bg-blue-500/10 border border-blue-500/10 text-[10px] text-blue-400">
-            Semua Area
+        <span class="shrink-0 text-[9px] font-bold tracking-wide
+            {{ $isDown
+                ? 'text-red-400'
+                : 'text-yellow-400'
+            }}">
+            {{ $statusLabel }}
         </span>
 
     </div>
 
 
-    <!-- GAUGE -->
-    <div class="px-5 pt-5">
+                        @if(!empty($alert->keterangan))
 
-        <div class="relative flex justify-center">
-
-            <svg
-                viewBox="0 0 200 120"
-                class="w-full max-w-[210px]"
-            >
-
-                <!-- Background -->
-                <path
-                    d="M 20 100 A 80 80 0 0 1 180 100"
-                    fill="none"
-                    stroke="#1e293b"
-                    stroke-width="18"
-                    stroke-linecap="round"
-                />
-
-                <!-- Progress -->
-                <path
-                    d="M 20 100 A 80 80 0 0 1 180 100"
-                    fill="none"
-                    stroke="#22c55e"
-                    stroke-width="18"
-                    stroke-linecap="round"
-                    pathLength="100"
-                    stroke-dasharray="{{ $readiness }} 100"
-                />
-
-            </svg>
-
-
-            <!-- CENTER VALUE -->
-            <div class="absolute inset-x-0 bottom-2 text-center">
-
-                <div class="text-4xl font-bold tracking-tight text-white">
-                    {{ $readiness }}%
-                </div>
-
-                <div class="mt-1 text-[10px] uppercase tracking-wider text-green-400 font-semibold">
-                    {{ $readiness >= 100 ? 'SIAP' : ($readiness >= 70 ? 'WASPADA' : 'PERLU PERHATIAN') }}
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- STATUS -->
-    <div class="px-4 mt-1">
-
-        <div class="grid grid-cols-3 gap-2">
-
-            <!-- READY -->
-            <div class="rounded-xl bg-green-500/10 border border-green-500/10 px-2 py-3 text-center">
-
-                <div class="text-xl font-bold text-green-400">
-                    {{ $ready }}
-                </div>
-
-                <div class="mt-1 text-[10px] text-green-400/80">
-                    Siap
-                </div>
-
-            </div>
-
-
-            <!-- MAINTENANCE -->
-            <div class="rounded-xl bg-yellow-500/10 border border-yellow-500/10 px-2 py-3 text-center">
-
-                <div class="text-xl font-bold text-yellow-400">
-                    {{ $maintenance }}
-                </div>
-
-                <div class="mt-1 text-[10px] text-yellow-400/80">
-                    Perhatian
-                </div>
-
-            </div>
-
-
-            <!-- DOWN -->
-            <div class="rounded-xl bg-red-500/10 border border-red-500/10 px-2 py-3 text-center">
-
-                <div class="text-xl font-bold text-red-400">
-                    {{ $down }}
-                </div>
-
-                <div class="mt-1 text-[10px] text-red-400/80">
-                    Down
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- TOTAL -->
-    <div class="px-5 py-4 mt-2">
-
-        <div class="rounded-xl bg-slate-900/60 border border-white/5 px-4 py-3 text-center">
-
-            <div class="text-[10px] uppercase tracking-wider text-slate-500">
-                Total Fasilitas Dipantau
-            </div>
-
-            <div class="mt-1 text-lg font-bold text-white">
-                {{ $totalFasilitas }}
-            </div>
-
-            <div class="text-[10px] text-slate-600">
-                fasilitas terdaftar
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-    <!-- ALERT -->
-    <div class="xl:col-span-3 glass-card rounded-2xl overflow-hidden">
-
-        <div class="px-5 py-4 border-b border-white/5 flex justify-between items-center">
-
-            <h2 class="font-bold text-white">
-                Alert Terbaru
-            </h2>
-
-            <span class="text-xs text-blue-400">
-                {{ $alertCount ?? 0 }} Alert
-            </span>
-
-        </div>
-
-
-        <div class="p-3 space-y-2 max-h-[390px] overflow-y-auto">
-
-            <!-- @php
-
-                $alerts = collect($fasilitasMap ?? [])
-                    ->whereIn('status', ['down', 'maintenance'])
-                    ->sortByDesc('updated_at')
-                    ->take(5);
-
-            @endphp -->
-
-
-            @forelse($alerts as $alert)
-
-                @php
-                    $isDown = $alert->status === 'down';
-                @endphp
-
-                <div class="rounded-xl p-3
-                    {{ $isDown
-                        ? 'bg-red-500/5 border border-red-500/10'
-                        : 'bg-yellow-500/5 border border-yellow-500/10'
-                    }}">
-
-                    <div class="flex items-start gap-3">
-
-                        <div class="w-9 h-9 rounded-lg flex items-center justify-center
-                            {{ $isDown
-                                ? 'bg-red-500/10 text-red-400'
-                                : 'bg-yellow-500/10 text-yellow-400'
-                            }}">
-
-                            @if($isDown)
-
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/>
-                                </svg>
-
-                            @else
-
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/>
-                                </svg>
-
-                            @endif
-
-                        </div>
-
-
-                        <div class="min-w-0 flex-1">
-
-                            <div class="flex justify-between gap-2">
-
-                                <p class="text-sm font-semibold text-white truncate">
-                                    {{ ucwords($alert->nama ?? $alert->detail ?? 'Fasilitas') }}
-                                </p>
-
-                            </div>
-
-                            <p class="text-xs mt-1
-                                {{ $isDown ? 'text-red-400' : 'text-yellow-400' }}">
-
-                                Status:
-                                {{ strtoupper($alert->status) }}
-
+                            <p class="text-[11px] text-slate-400 mt-1 truncate">
+                                {{ $alert->keterangan }}
                             </p>
 
-                            @if(!empty($alert->keterangan))
+                        @else
 
-                                <p class="text-[11px] text-slate-500 mt-1 truncate">
-                                    {{ $alert->keterangan }}
-                                </p>
+                            <p class="text-[11px] text-slate-600 mt-1">
+                                Tidak ada keterangan
+                            </p>
 
-                            @endif
+                        @endif
+
+
+                        <div class="flex items-center gap-1 mt-2 text-[9px] text-slate-600">
+
+                            <svg
+                                class="w-3 h-3"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                            </svg>
+
+                            Diperbarui
+                            {{ optional($alert->updated_at)->diffForHumans() }}
 
                         </div>
 
@@ -366,34 +223,49 @@
 
                 </div>
 
-            @empty
+            </div>
 
-                <div class="text-center py-10">
+        @empty
 
-                    <div class="w-12 h-12 mx-auto rounded-full bg-green-500/10 flex items-center justify-center">
+            <!-- EMPTY STATE -->
+            <div class="flex flex-col items-center justify-center text-center py-12 px-4">
 
-                        <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M5 13l4 4L19 7"/>
-                        </svg>
+                <div class="w-14 h-14 rounded-2xl bg-green-500/10 border border-green-500/10 flex items-center justify-center">
 
-                    </div>
-
-                    <p class="text-sm text-green-400 font-medium mt-3">
-                        Semua fasilitas siap
-                    </p>
-
-                    <p class="text-xs text-slate-600 mt-1">
-                        Tidak ada alert aktif
-                    </p>
+                    <svg
+                        class="w-7 h-7 text-green-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                        />
+                    </svg>
 
                 </div>
 
-            @endforelse
+                <p class="text-sm text-green-400 font-semibold mt-4">
+                    Semua fasilitas siap
+                </p>
 
-        </div>
+                <p class="text-[11px] text-slate-600 mt-1">
+                    Tidak ada alert aktif saat ini
+                </p>
+
+            </div>
+
+        @endforelse
 
     </div>
+
+    </div>
+
+
+
 
 </div>
 
@@ -1122,7 +994,12 @@
                         <td class="px-4 py-4">
 
                             <div class="flex flex-wrap gap-1.5">
-
+<a
+    href="{{ route('fasilitas.show', $item->id) }}"
+    class="bg-slate-600/80 hover:bg-slate-500 text-white px-2.5 py-1.5 rounded-lg text-[11px]"
+>
+    Detail
+</a>
                                 <button
                                     onclick="openUpdateModal({{ $item->id }})"
                                     class="bg-green-600/80 hover:bg-green-500 text-white px-2.5 py-1.5 rounded-lg text-[11px]"

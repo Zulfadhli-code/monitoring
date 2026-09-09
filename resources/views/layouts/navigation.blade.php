@@ -1,13 +1,33 @@
 <aside
     x-data
-    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+    :class="sidebarOpen
+        ? 'translate-x-0'
+        : (sidebarCollapsed
+            ? '-translate-x-full'
+            : '-translate-x-full lg:translate-x-0')"
     class="fixed left-0 top-0 z-50 h-screen w-64
            sidebar-gradient border-r border-white/5
            transition-transform duration-300 ease-in-out"
 >
 
     <div class="flex h-full flex-col">
-
+<!-- DESKTOP SIDEBAR TOGGLE -->
+<button
+    @click="sidebarCollapsed = !sidebarCollapsed"
+    class="hidden lg:flex absolute -right-4 top-8
+           w-8 h-8 rounded-full
+           bg-slate-800 border border-white/10
+           text-slate-300 hover:text-white
+           hover:bg-slate-700
+           items-center justify-center
+           shadow-lg transition"
+    title="Sembunyikan / tampilkan sidebar"
+>
+    <span
+        x-text="sidebarCollapsed ? '›' : '‹'"
+        class="text-xl leading-none"
+    ></span>
+</button>
         <!-- LOGO -->
         <div class="flex h-20 items-center px-6 border-b border-white/5">
 
@@ -111,10 +131,12 @@
 
 
             <!-- KESIAPAN TEKNIK -->
-            <a href="#"
-               class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
-                      text-slate-400 hover:bg-white/5 hover:text-white transition">
-
+            <a href="{{ route('kesiapan.teknik') }}"
+                class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
+          {{ request()->routeIs('kesiapan.teknik')
+              ? 'bg-blue-600/20 text-blue-400 border border-blue-500/20'
+              : 'text-slate-400 hover:bg-white/5 hover:text-white' }}
+          transition">
                 <svg class="w-5 h-5"
                      fill="none"
                      stroke="currentColor"
@@ -135,10 +157,12 @@
 
 
             <!-- KESIAPAN OPERASIONAL -->
-            <a href="#"
-               class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
-                      text-slate-400 hover:bg-white/5 hover:text-white transition">
-
+<a href="{{ route('kesiapan.operasional') }}"
+   class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
+          {{ request()->routeIs('kesiapan.operasional')
+              ? 'bg-blue-600/20 text-blue-400 border border-blue-500/20'
+              : 'text-slate-400 hover:bg-white/5 hover:text-white' }}
+          transition">
                 <svg class="w-5 h-5"
                      fill="none"
                      stroke="currentColor"
@@ -157,12 +181,13 @@
 
             </a>
 
-
-            <!-- PERANGKAT PENDUKUNG -->
-            <a href="#"
-               class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
-                      text-slate-400 hover:bg-white/5 hover:text-white transition">
-
+<!-- PERANGKAT PENDUKUNG -->
+<a href="{{ route('perangkat.pendukung') }}"
+   class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
+          {{ request()->routeIs('perangkat.pendukung')
+              ? 'bg-blue-600/20 text-blue-400 border border-blue-500/20'
+              : 'text-slate-400 hover:bg-white/5 hover:text-white' }}
+          transition">
                 <svg class="w-5 h-5"
                      fill="none"
                      stroke="currentColor"
@@ -180,6 +205,36 @@
                 </span>
 
             </a>
+            {{-- AUDIT LOG - ADMIN ONLY --}}
+@if(auth()->user()->role === 'admin')
+
+    <a href="{{ route('audit.logs') }}"
+       class="mt-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
+              {{ request()->routeIs('audit.logs')
+                  ? 'bg-blue-600/20 text-blue-400 border border-blue-500/20'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white' }}
+              transition">
+
+        <svg class="w-5 h-5"
+             fill="none"
+             stroke="currentColor"
+             viewBox="0 0 24 24">
+            <path stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
+                     M9 5a2 2 0 002 2h2a2 2 0 002-2
+                     M9 12h6
+                     M9 16h6"/>
+        </svg>
+
+        <span class="text-sm font-medium">
+            Audit Log
+        </span>
+
+    </a>
+
+@endif
 
 
             <!-- DIVIDER -->
