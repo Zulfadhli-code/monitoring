@@ -60,101 +60,50 @@
 
 
                     {{-- LOKASI --}}
-                    <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-2">
-                            Lokasi
-                        </label>
+<div>
+    <label class="block text-sm font-medium text-slate-300 mb-2">
+        Lokasi
+    </label>
 
-                        <select
-                            name="lokasi"
-                            class="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-slate-200"
-                        >
-                            @foreach([
-                                'Belawan Lama',
-                                'Ujung Baru',
-                                'IKD',
-                                'Dermaga Citra',
-                                'Gate 01',
-                                'Gate 02',
-                                'Gate 03',
-                                'Gate 04',
-                                'Gate 05',
-                            ] as $lokasi)
-
-                                <option
-                                    value="{{ $lokasi }}"
-                                    @selected($fasilitas->lokasi === $lokasi)
-                                >
-                                    {{ $lokasi }}
-                                </option>
-
-                            @endforeach
-                        </select>
-                    </div>
+    <input
+        type="text"
+        name="lokasi"
+        value="{{ old('lokasi', $fasilitas->lokasi) }}"
+        class="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-slate-200"
+        placeholder="Masukkan lokasi"
+    >
+</div>
 
 
-                    {{-- KATEGORI --}}
-                    <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-2">
-                            Kategori
-                        </label>
+                  {{-- KATEGORI --}}
+<div>
+    <label class="block text-sm font-medium text-slate-300 mb-2">
+        Kategori
+    </label>
 
-                        <select
-                            name="kategori"
-                            class="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-slate-200"
-                        >
+    <input
+        type="text"
+        name="kategori"
+        value="{{ old('kategori', $fasilitas->kategori) }}"
+        class="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-slate-200"
+        placeholder="Masukkan kategori"
+    >
+</div>
 
-                            @foreach([
-                                'Kesiapan Teknik',
-                                'Kesiapan Operasional',
-                                'Perangkat Pendukung',
-                            ] as $kategori)
+{{-- SUBKATEGORI --}}
+<div>
+    <label class="block text-sm font-medium text-slate-300 mb-2">
+        Subkategori
+    </label>
 
-                                <option
-                                    value="{{ $kategori }}"
-                                    @selected($fasilitas->kategori === $kategori)
-                                >
-                                    {{ $kategori }}
-                                </option>
-
-                            @endforeach
-
-                        </select>
-                    </div>
-
-
-                    {{-- SUBKATEGORI --}}
-                    <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-2">
-                            Subkategori
-                        </label>
-
-                        <select
-                            name="subkategori"
-                            class="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-slate-200"
-                        >
-
-                            @foreach([
-                                'CCTV',
-                                'Access Control',
-                                'Intercom',
-                                'Printer',
-                                'Network',
-                                'Lainnya',
-                            ] as $subkategori)
-
-                                <option
-                                    value="{{ $subkategori }}"
-                                    @selected($fasilitas->subkategori === $subkategori)
-                                >
-                                    {{ $subkategori }}
-                                </option>
-
-                            @endforeach
-
-                        </select>
-                    </div>
-
+    <input
+        type="text"
+        name="subkategori"
+        value="{{ old('subkategori', $fasilitas->subkategori) }}"
+        class="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-slate-200"
+        placeholder="Masukkan subkategori"
+    >
+</div>
 
                     {{-- STATUS --}}
                     <div>
