@@ -62,7 +62,13 @@ class DashboardController extends Controller
         $fasilitasMap = Fasilitas::whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->get();
-        $fasilitas = Fasilitas::latest()->paginate(10);
+        $fasilitas = Fasilitas::query()
+    ->when($request->search, function ($query) use ($request) {
+        $query->where('nama', 'like', '%' . $request->search . '%');
+    })
+    ->latest()
+    ->paginate(10)
+    ->withQueryString();
 
         return view('dashboard', [
             'fasilitas' => $fasilitas,

@@ -8,6 +8,7 @@ use App\Exports\HistoryExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\MonthlyExportController;
 
 // redirect root ke dashboard
 Route::get('/', function () {
@@ -181,6 +182,9 @@ Route::get('/export-history', function () {
 
 })->middleware('auth');
 
+Route::get('/export-monthly-excel', [MonthlyExportController::class, 'excel'])
+    ->middleware('auth')
+    ->name('export.monthly.excel');
 
 // =============================================================
 // DASHBOARD - ADMIN + TEKNISI

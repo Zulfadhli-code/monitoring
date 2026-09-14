@@ -349,6 +349,41 @@
                     </p>
 
                 @endif
+                {{-- FOTO HISTORI --}}
+@if($history->photos->count())
+
+    <div class="mt-4">
+
+        <p class="text-xs text-slate-500 mb-2">
+            Dokumentasi ({{ $history->photos->count() }} foto)
+        </p>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+
+            @foreach($history->photos as $photo)
+
+                <a
+                    href="{{ asset('storage/'.$photo->foto) }}"
+                    target="_blank"
+                    class="block group"
+                >
+                    <img
+                        src="{{ asset('storage/'.$photo->foto) }}"
+                        alt="Dokumentasi {{ $fasilitas->nama }}"
+                        class="w-full h-28 object-cover rounded-xl
+                               border border-white/10
+                               group-hover:scale-[1.02]
+                               transition"
+                    >
+                </a>
+
+            @endforeach
+
+        </div>
+
+    </div>
+
+@endif
 
                 <p class="text-xs text-slate-500 mt-3">
                     Oleh:
