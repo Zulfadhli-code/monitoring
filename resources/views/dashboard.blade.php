@@ -851,6 +851,11 @@
 | MAP
 |--------------------------------------------------------------------------
 */
+/*
+|--------------------------------------------------------------------------
+| MAP
+|--------------------------------------------------------------------------
+*/
 
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -876,6 +881,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const data = @json($fasilitasMap ?? []);
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Group fasilitas berdasarkan koordinat
+    |--------------------------------------------------------------------------
+    */
+
+    const groupedLocations = {};
+
+
     data.forEach(item => {
 
         if (!item.latitude || !item.longitude) {
@@ -883,64 +897,456 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
 
-        let color = '#22c55e';
+        const lat = parseFloat(item.latitude);
+        const lng = parseFloat(item.longitude);
 
-        if (item.status === 'maintenance') {
-            color = '#facc15';
+
+        if (isNaN(lat) || isNaN(lng)) {
+            return;
         }
 
-        if (item.status === 'down') {
-            color = '#ef4444';
+
+        /*
+        | Gunakan koordinat sebagai identitas lokasi
+        */
+
+        const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+
+
+        if (!groupedLocations[key]) {
+
+            groupedLocations[key] = {
+                latitude: lat,
+                longitude: lng,
+                items: []
+            };
+
         }
 
 
-        const marker = L.circleMarker(
+        groupedLocations[key].items.push(item);
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Helper status
+    |--------------------------------------------------------------------------
+    */
+
+    function getStatusColor(status) {
+
+        if (status === 'down') {
+            return '#ef4444';
+        }
+
+        if (status === 'maintenance') {
+            return '#facc15';
+        }
+
+        return '#22c55e';
+
+    }
+
+
+    function getStatusText(status) {
+
+        if (status === 'down') {
+            return 'DOWN';
+        }
+
+        if (status === 'maintenance') {
+            return 'MAINTENANCE';
+        }
+
+        return 'READY';
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Escape HTML
+    |--------------------------------------------------------------------------
+    */
+
+    function escapeHtml(value) {
+
+        if (value === null || value === undefined) {
+            return '-';
+        }
+
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tampilkan marker berdasarkan lokasi
+    |--------------------------------------------------------------------------
+    */
+
+    Object.values(groupedLocations).forEach(location => {
+
+        const items = location.items;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Tentukan warna marker
+        |--------------------------------------------------------------------------
+        |
+        | Jika ada DOWN → merah
+        | Jika tidak ada DOWN tapi ada MAINTENANCE → kuning
+        | Selain itu → hijau
+        |
+        */
+
+        let markerColor = '#22c55e';
+
+
+        if (
+            items.some(item => item.status === 'down')
+        ) {
+
+            markerColor = '#ef4444';
+
+        } else if (
+            items.some(item => item.status === 'maintenance')
+        ) {
+
+            markerColor = '#facc15';
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SATU PERANGKAT
+        |--------------------------------------------------------------------------
+        */
+
+        if (items.length === 1) {
+
+            const item = items[0];
+
+
+            const marker = L.circleMarker(
+                [
+                    location.latitude,
+                    location.longitude
+                ],
+                {
+                    radius: 8,
+                    color: markerColor,
+                    fillColor: markerColor,
+                    fillOpacity: 0.9,
+                    weight: 2
+                }
+            ).addTo(map);
+
+
+            marker.bindPopup(`
+
+                <div style="min-width:220px">
+
+                    <div style="
+                        font-weight:700;
+                        font-size:15px;
+                        margin-bottom:8px;
+                    ">
+                        ${escapeHtml(
+                            item.nama ??
+                            item.detail ??
+                            'Fasilitas'
+                        )}
+                    </div>
+
+
+                    <div style="
+                        font-size:12px;
+                        margin-bottom:4px;
+                    ">
+                        <b>Lokasi:</b>
+                        ${escapeHtml(item.lokasi)}
+                    </div>
+
+
+                    <div style="
+                        font-size:12px;
+                        margin-bottom:4px;
+                    ">
+                        <b>Kategori:</b>
+                        ${escapeHtml(item.kategori)}
+                    </div>
+
+
+                    <div style="font-size:12px">
+
+                        <b>Status:</b>
+
+                        <span style="
+                            color:${markerColor};
+                            font-weight:700;
+                        ">
+                            ${getStatusText(item.status)}
+                        </span>
+
+                    </div>
+
+
+                    <a
+                        href="/fasilitas/${item.id}"
+                        style="
+                            display:block;
+                            margin-top:12px;
+                            color:#60a5fa;
+                            font-size:12px;
+                            font-weight:600;
+                            text-decoration:none;
+                        "
+                    >
+                        Lihat Detail →
+                    </a>
+
+                </div>
+
+            `);
+
+            return;
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BANYAK PERANGKAT DI LOKASI YANG SAMA
+        |--------------------------------------------------------------------------
+        */
+
+        const markerIcon = L.divIcon({
+
+            className: '',
+
+            html: `
+
+                <div style="
+                    width:34px;
+                    height:34px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                ">
+
+                    <div style="
+                        width:28px;
+                        height:28px;
+                        border-radius:50%;
+                        background:${markerColor};
+                        border:3px solid white;
+                        box-shadow:0 2px 8px rgba(0,0,0,0.35);
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        color:white;
+                        font-size:12px;
+                        font-weight:800;
+                    ">
+                        ${items.length}
+                    </div>
+
+                </div>
+
+            `,
+
+            iconSize: [34, 34],
+
+            iconAnchor: [17, 17],
+
+            popupAnchor: [0, -17]
+
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Marker tetap di koordinat ASLI
+        |--------------------------------------------------------------------------
+        */
+
+        const marker = L.marker(
             [
-                parseFloat(item.latitude),
-                parseFloat(item.longitude)
+                location.latitude,
+                location.longitude
             ],
             {
-                radius: 8,
-                color: color,
-                fillColor: color,
-                fillOpacity: 0.9,
-                weight: 2
+                icon: markerIcon
             }
         ).addTo(map);
 
 
-        const statusText =
-            item.status === 'ready'
-                ? 'READY'
-                : item.status === 'maintenance'
-                    ? 'MAINTENANCE'
-                    : 'DOWN';
+        const locationName =
+            items[0].lokasi ??
+            'Lokasi Fasilitas';
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Buat daftar perangkat
+        |--------------------------------------------------------------------------
+        */
+
+        let deviceList = '';
+
+
+        items.forEach(item => {
+
+            const color = getStatusColor(item.status);
+
+            const statusText = getStatusText(item.status);
+
+
+            deviceList += `
+
+                <a
+                    href="/fasilitas/${item.id}"
+                    style="
+                        display:block;
+                        text-decoration:none;
+                        color:inherit;
+                        padding:10px;
+                        margin-bottom:7px;
+                        border:1px solid rgba(148,163,184,0.15);
+                        border-radius:10px;
+                        background:rgba(15,23,42,0.65);
+                    "
+                >
+
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:flex-start;
+                        gap:10px;
+                    ">
+
+
+                        <div style="
+                            min-width:0;
+                            flex:1;
+                        ">
+
+                            <div style="
+                                font-weight:700;
+                                font-size:13px;
+                                margin-bottom:3px;
+                            ">
+                                ${escapeHtml(
+                                    item.nama ??
+                                    item.detail ??
+                                    'Fasilitas'
+                                )}
+                            </div>
+
+
+                            <div style="
+                                font-size:11px;
+                                color:#94a3b8;
+                            ">
+                                ${escapeHtml(
+                                    item.kategori ?? '-'
+                                )}
+
+                                ${
+                                    item.subkategori
+                                        ? ' • ' +
+                                          escapeHtml(
+                                              item.subkategori
+                                          )
+                                        : ''
+                                }
+                            </div>
+
+                        </div>
+
+
+                        <span style="
+                            flex-shrink:0;
+                            color:${color};
+                            font-size:10px;
+                            font-weight:800;
+                            white-space:nowrap;
+                        ">
+                            ${statusText}
+                        </span>
+
+
+                    </div>
+
+                </a>
+
+            `;
+
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Popup lokasi
+        |--------------------------------------------------------------------------
+        */
 
         marker.bindPopup(`
 
-            <div style="min-width:220px">
+            <div style="
+                width:300px;
+                max-width:80vw;
+            ">
 
-                <div style="font-weight:700;font-size:15px;margin-bottom:8px">
-                    ${item.nama ?? item.detail ?? 'Fasilitas'}
+
+                <div style="
+                    margin-bottom:10px;
+                ">
+
+
+                    <div style="
+                        font-size:15px;
+                        font-weight:800;
+                        margin-bottom:3px;
+                    ">
+                        ${escapeHtml(locationName)}
+                    </div>
+
+
+                    <div style="
+                        font-size:11px;
+                        color:#64748b;
+                    ">
+                        ${items.length} perangkat
+                    </div>
+
+
                 </div>
 
-                <div style="font-size:12px;margin-bottom:4px">
-                    <b>Lokasi:</b>
-                    ${item.lokasi ?? '-'}
+
+                <div style="
+                    border-top:1px solid rgba(148,163,184,0.2);
+                    padding-top:10px;
+                    max-height:280px;
+                    overflow-y:auto;
+                    padding-right:4px;
+                ">
+
+                    ${deviceList}
+
                 </div>
 
-                <div style="font-size:12px;margin-bottom:4px">
-                    <b>Kategori:</b>
-                    ${item.kategori ?? '-'}
-                </div>
-
-                <div style="font-size:12px">
-                    <b>Status:</b>
-                    <span style="color:${color};font-weight:700">
-                        ${statusText}
-                    </span>
-                </div>
 
             </div>
 
@@ -956,11 +1362,12 @@ document.addEventListener('DOMContentLoaded', function () {
     */
 
     setTimeout(() => {
+
         map.invalidateSize();
+
     }, 500);
 
 });
-
 
 /*
 |--------------------------------------------------------------------------
