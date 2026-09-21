@@ -128,7 +128,7 @@ use App\Models\AuditLog;
         'detail' => 'required|string|max:1000',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
-            'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120'
+            'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:51200'
 
         ]);
 
@@ -358,7 +358,7 @@ public function updateData(Request $request, $id)
     $request->validate([
         'status' => 'required|in:ready,maintenance,down',
         'keterangan' => 'nullable|string|max:1000',
-        'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120'
+        'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:51200'
     ]);
 
     // BATASI JUMLAH FOTO
@@ -462,7 +462,7 @@ public function updateData(Request $request, $id)
             'keterangan' => 'nullable|string|max:1000',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
-            'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'foto.*' => 'nullable|image|mimes:jpg,jpeg,png|max:51200',
         ]);
 
         $fasilitas = Fasilitas::findOrFail($id);
